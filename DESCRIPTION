@@ -51,7 +51,7 @@ Config/testthat/edition: 3
 VignetteBuilder: knitr
 Config/roxygen2/version: 8.0.0
 NeedsCompilation: no
-Packaged: 2026-08-07 22:17:30 UTC; z3437171
+Packaged: 2026-08-07 22:36:30 UTC; z3437171
 Author: Shinichi Nakagawa [aut, cre, cph] (ORCID:
     <https://orcid.org/0000-0002-7765-5182>),
   Santiago Ortega [aut],
