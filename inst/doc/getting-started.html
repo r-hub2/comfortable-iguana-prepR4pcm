@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Getting Started with prepR4pcm</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Getting Started with prepR4pcm</h1>
+
+
+
+<p>Before running any phylogenetic comparative analysis — PGLS,
+phylogenetic mixed models, ancestral state reconstruction — species
+names in your data must match the tip labels in your tree. In practice,
+they rarely do. <strong>prepR4pcm</strong> automates the matching of
+species names between data and tree (which we call
+<em>reconciliation</em>), records every name-matching decision so you
+can audit it later, and produces an aligned data frame + pruned tree
+(the <em>aligned objects</em>) where the species lists match exactly —
+the precondition for any phylogenetic comparative method.</p>
+<div id="the-problem" class="section level2">
+<h2>The problem</h2>
+<p>Mismatches between data and tree arise from three kinds of
+difference:</p>
+<ul>
+<li><strong>Formatting differences</strong> — same species, written
+differently. For example, the same animal may appear as
+<code>Homo_sapiens</code> in the tree and as <code>Homo sapiens</code>
+in the data; trailing whitespace and attached authority strings
+(<code>Homo sapiens Linnaeus, 1758</code>) cause similar
+mismatches.</li>
+<li><strong>Synonymy</strong> — situations where multiple scientific
+names refer to the same taxonomic group (often a species or genus); for
+example, when a recent taxonomic revision moved a species to a different
+genus, the older and newer names both circulate in the literature. See
+<a href="https://en.wikipedia.org/wiki/Synonym_(taxonomy)">Synonym
+(taxonomy) on Wikipedia</a> for a fuller introduction.</li>
+<li><strong>Missing names</strong> — species in the data but not the
+tree, or in the tree but not the data, with no naming-rule that would
+link them.</li>
+</ul>
+<p>Fixing these by hand is tedious, error-prone, and poorly documented.
+<strong>prepR4pcm</strong> solves this with a structured matching
+cascade of algorithms: exact match → normalised match → synonym
+resolution. Every decision is recorded by the software in the
+reconciliation result, where you can inspect it via
+<code>reconcile_mapping()</code> or
+<code>reconcile_summary()</code>.</p>
+</div>
+<div id="installation" class="section level2">
+<h2>Installation</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co"># Install pak if you don&#39;t have it</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="co"># install.packages(&quot;pak&quot;)</span></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="co"># Install prepR4pcm from GitHub</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>pak<span class="sc">::</span><span class="fu">pak</span>(<span class="st">&quot;itchyshin/prepR4pcm&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">library</span>(prepR4pcm)</span></code></pre></div>
+</div>
+<div id="example-1-reconcile-a-dataset-against-a-tree" class="section level2">
+<h2>Example 1: Reconcile a dataset against a tree</h2>
+<p>Suppose you have trait data and a phylogenetic tree with slightly
+different naming conventions.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># Simulated trait data for 6 primate species</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>trait_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>  <span class="at">species =</span> <span class="fu">c</span>(</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>    <span class="st">&quot;Homo sapiens&quot;</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>    <span class="st">&quot;Pan_troglodytes&quot;</span>,       <span class="co"># underscore instead of space</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>    <span class="st">&quot;Gorilla gorilla&quot;</span>,</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>    <span class="st">&quot;Pongo pygmaeus&quot;</span>,</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>    <span class="st">&quot;Macaca mulatta&quot;</span>,</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>    <span class="st">&quot;Cebus capucinus&quot;</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>  ),</span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>  <span class="at">body_mass =</span> <span class="fu">c</span>(<span class="dv">70</span>, <span class="dv">50</span>, <span class="dv">160</span>, <span class="dv">80</span>, <span class="dv">8</span>, <span class="dv">3</span>),</span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>  <span class="at">brain_mass =</span> <span class="fu">c</span>(<span class="fl">1.35</span>, <span class="fl">0.39</span>, <span class="fl">0.50</span>, <span class="fl">0.37</span>, <span class="fl">0.11</span>, <span class="fl">0.07</span>)</span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>)</span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co"># Simulated phylogenetic tree (built manually for this example)</span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>tree <span class="ot">&lt;-</span> ape<span class="sc">::</span><span class="fu">read.tree</span>(<span class="at">text =</span> <span class="fu">paste0</span>(</span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a>  <span class="st">&quot;((((Homo_sapiens:5,Pan_troglodytes:5):3,&quot;</span>,</span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a>  <span class="st">&quot;Gorilla_gorilla:8):4,Pongo_pygmaeus:12):6,&quot;</span>,</span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a>  <span class="st">&quot;(Macaca_mulatta:10,Papio_anubis:10):8);&quot;</span></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a>))</span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a></span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a>tree<span class="sc">$</span>tip.label   <span class="co"># the tip labels (species names) on the tree</span></span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Homo_sapiens&quot;    &quot;Pan_troglodytes&quot; &quot;Gorilla_gorilla&quot; &quot;Pongo_pygmaeus&quot; </span></span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a><span class="co">#&gt; [5] &quot;Macaca_mulatta&quot;  &quot;Papio_anubis&quot;</span></span>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a><span class="fu">plot</span>(tree)       <span class="co"># quick visual; underscores in tip labels render as spaces</span></span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASAAAAEgCAYAAAAUg66AAAAEDmlDQ1BrQ0dDb2xvclNwYWNlR2VuZXJpY1JHQgAAOI2NVV1oHFUUPpu5syskzoPUpqaSDv41lLRsUtGE2uj+ZbNt3CyTbLRBkMns3Z1pJjPj/KRpKT4UQRDBqOCT4P9bwSchaqvtiy2itFCiBIMo+ND6R6HSFwnruTOzu5O4a73L3PnmnO9+595z7t4LkLgsW5beJQIsGq4t5dPis8fmxMQ6dMF90A190C0rjpUqlSYBG+PCv9rt7yDG3tf2t/f/Z+uuUEcBiN2F2Kw4yiLiZQD+FcWyXYAEQfvICddi+AnEO2ycIOISw7UAVxieD/Cyz5mRMohfRSwoqoz+xNuIB+cj9loEB3Pw2448NaitKSLLRck2q5pOI9O9g/t/tkXda8Tbg0+PszB9FN8DuPaXKnKW4YcQn1Xk3HSIry5ps8UQ/2W5aQnxIwBdu7yFcgrxPsRjVXu8HOh0qao30cArp9SZZxDfg3h1wTzKxu5E/LUxX5wKdX5SnAzmDx4A4OIqLbB69yMesE1pKojLjVdoNsfyiPi45hZmAn3uLWdpOtfQOaVmikEs7ovj8hFWpz7EV6mel0L9Xy23FMYlPYZenAx0yDB1/PX6dledmQjikjkXCxqMJS9WtfFCyH9XtSekEF+2dH+P4tzITduTygGfv58a5VCTH5PtXD7EFZiNyUDBhHnsFTBgE0SQIA9pfFtgo6cKGuhooeilaKH41eDs38Ip+f4At1Rq/sjr6NEwQqb/I/DQqsLvaFUjvAx+eWirddAJZnAj1DFJL0mSg/gcIpPkMBkhoyCSJ8lTZIxk0TpKDjXHliJzZPO50dR5ASNSnzeLvIvod0HG/mdkmOC0z8VKnzcQ2M/Yz2vKldduXjp9bleLu0ZWn7vWc+l0JGcaai10yNrUnXLP/8Jf59ewX+c3Wgz+B34Df+vbVrc16zTMVgp9um9bxEfzPU5kPqUtVWxhs6OiWTVW+gIfywB9uXi7CGcGW/zk98k/kmvJ95IfJn/j3uQ+4c5zn3Kfcd+AyF3gLnJfcl9xH3OfR2rUee80a+6vo7EK5mmXUdyfQlrYLTwoZIU9wsPCZEtP6BWGhAlhL3p2N6sTjRdduwbHsG9kq32sgBepc+xurLPW4T9URpYGJ3ym4+8zA05u44QjST8ZIoVtu3qE7fWmdn5LPdqvgcZz8Ww8BWJ8X3w0PhQ/wnCDGd+LvlHs8dRy6bLLDuKMaZ20tZrqisPJ5ONiCq8yKhYM5cCgKOu66Lsc0aYOtZdo5QCwezI4wm9J/v0X23mlZXOfBjj8Jzv3WrY5D+CsA9D7aMs2gGfjve8ArD6mePZSeCfEYt8CONWDw8FXTxrPqx/r9Vt4biXeANh8vV7/+/16ffMD1N8AuKD/A/8leAvFY9bLAAAAOGVYSWZNTQAqAAAACAABh2kABAAAAAEAAAAaAAAAAAACoAIABAAAAAEAAAEgoAMABAAAAAEAAAEgAAAAAKtAJY0AADVDSURBVHgB7Z0J3G1T+ce3hn+hSREVpdIkKQ0S4ipUJCJFKhkyJSEZmrgSDZI5ZE5cMlTiRulSQvMkTTd1C03GSnOt//N96tmts+857zrv+5797vfe9/d8Puc9++y99lpr/96zfmetZ63nt5ZIZpVMCAgBIdABAvfpoEwVKQSEgBBwBERA+iIIASHQGQIioM6gV8FCQAiIgPQdEAJCoDMERECdQa+ChYAQEAHpOyAEhEBnCIiAOoNeBQsBISAC0ndACAiBzhAQAXUGvQoWAkJABKTvgBAQAp0hIALqDHoVLASEgAhI3wEhIAQ6Q0AE1Bn0KlgICAERkL4DQkAIdIaACKgz6FWwEBACIiB9B4SAEOgMARFQZ9CrYCEgBERA+g4IASHQGQIioM6gV8FCQAiIgPQdEAJCoDMERECdQa+ChYAQEAHpOyAEhEBnCIiAOoNeBQsBISAC0ndACAiBzhAQAXUGvQoWAkJABKTvgBAQAp0hIALqDHoVLASEgAhI3wEhIAQ6Q0AE1Bn0KlgICAERkL4DQkAIdIaACKgz6FWwEBACIiB9B4SAEOgMARFQZ9CrYCEgBERA+g4IASHQGQIioM6gV8FCQAiIgPQdEAJCoDMERECdQa+ChYAQEAHpOyAEhEBnCIiAOoNeBQsBISAC0ndACAiBzhAQAXUGvQoWAkJABKTvgBAQAp0hIALqDHoVLASEgAhI3wEhIAQ6Q0AE1Bn0KlgICAERkL4DQkAIdIaACKgz6FWwEBACIiB9B4SAEOgMARFQZ9CrYCEgBERA+g4IASHQGQIioM6gV8FCQAiIgPQdEAJCoDMERECdQa+ChYAQEAHpOyAEhEBnCIiAOoNeBQsBISAC0ndACAiBzhAQAXUGvQoWAkJABKTvgBAQAp0hIALqDHoVLASEgAhI3wEhIAQ6Q0AE1Bn0KlgICAERkL4DQkAIdIaACKgz6FWwEBACIiB9B4SAEOgMARFQZ9CrYCEgBERA+g4IASHQGQIioM6gV8FCQAiIgPQdEAJCoDMERECdQa+ChYAQEAHpOyAEhEBnCIiAOoNeBQsBISAC0ndACAiBzhAQAXUGvQoWAkJABKTvgBAQAp0hIALqDHoVLASEgAhI3wEhIAQ6Q0AE1Bn0KlgICIH7CYLpg8APfvCD6ve//301a9ashSo1f/786uabb65e/OIXV/e9732rP/7xj9Wtt97q6fm8/PLLV495zGOqBz7wgX7vLbfcUt11111+/qc//Wn197//3a8/+clPrvP+5S9/Wd1xxx3VGmus4edSShVpqcNf//rX6iEPeUj1tKc9rXrQgx5U39Pv4De/+U3129/+trrzzjurhz70odUjH/lIL2uJJZbw5N/73veqZZddtrrf/e5X/fznP/e8H/3oR1dPetKT6uxI8+AHP7h6/OMfX5/7xS9+Ud1zzz3VM5/5TD/31a9+tVpyySX9GW+77TbP7ylPeUq13HLL+fV77723+v73v1894xnPqJZeeumK5/nVr35V/frXv67+9re/ORYrrriiX6sL0UG3CNg/STZNELCGljbddNOFamMNKFnDTM9//vP9mpFGetSjHpU23njjdM4556Tjjz8+WUNML3nJS+p7X/GKVyRrmGn99ddPF154YXrTm96U7JuWTjzxxDrNy172svTyl7/cP//zn/9M66yzjud72mmnpUsuucTLW2aZZdLtt99e39M8+NSnPpWMANM+++zj97zzne9M//d//5dOPfVUT2rElx7wgAekjTbayF/nn39+Ovjgg70uX//61z3NP/7xD09z7LHH9mS/wQYbpK233trPUT8jH0/3ute9Lp177rlePyPcZGTrac4444x0n/vcJ/3pT3+qPxvhpDlz5qRPfvKTnv5Zz3pWTxn60C0C/ErIpgECf/nLX5L1ENKrX/3qdMUVV/jrE5/4RHrXu96VnvCEJ6T73//+6Utf+pLX9MMf/nB60YtelLgn7PTTT/dGbb0AP2W9obTKKqvUjZGTq622WlpvvfXilmS9pvSe97zHP3/sYx/zxv3DH/6wvm69Fc/zyCOPrM/l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ermvDILheSAdlhxgYEBe7EFmwviV7WJamfC+P3/sq9bEgPvAkiUL9IxKdSe9rF0ElsC33W4Ryr2EACSCg5bG1S9IFWcqFo2PYxo6e5fz72PIgdMYkgpjH3WGEJADBgFBKDi76QFg+FDIG8XCGLZQF5vmrsM9qA/5jiUoRj7UhXeMngplhyPbtnB2EqOuXCM/0pMnEqccQ3LUDfKhrtQnz4N6ci6XRA0MCE0hX4hqLAyoGzjz/DG8KtWde2TtISACag9b5SwEhEABAQ3BCgDpshAQAu0hIAJqD1vlLASEQAEBEVABIF0WAkKgPQREQO1hq5yFgBAoICACKgCky0JACLSHgAioPWyVsxAQAgUEREAFgHRZCAiB9hAQAbWHrXIWAkKggIAIqACQLgsBIdAeAiKg9rBVzkJACBQQEAEVANJlISAE2kNABNQetspZCAiBAgIioAJAuiwEhEB7CIiA2sNWOQsBIVBAQARUAEiXhYAQaA8BEVB72CpnISAECgiIgAoA6bIQEALtISACag9b5SwEhEABARFQASBdFgJCoD0EREDtYauchYAQKCAgAioApMtCQAi0h4AIqD1slbMQEAIFBERABYB0WQgIgfYQEAG1h61yFgJCoICACKgAkC4LASHQHgIioPawVc5CQAgUEBABFQDSZSEgBNpDQATUHrbKWQgIgQICIqACQLosBIRAewiIgNrDVjkLASFQQEAEVABIl4WAEGgPARFQe9gqZyEgBAoIiIAKAOmyEBAC7SEgAmoPW+UsBIRAAQERUAEgXRYCQqA9BERA7WGrnIWAECggIAIqAKTLQkAItIeACKg9bJWzEBACBQREQAWAdFkICIH2EBABtYetchYCQqCAgAioAJAuCwEh0B4CIqD2sFXOQkAIFBAQARUA0mUhIATaQ0AE1B62ylkICIECAiKgAkC6LASEQHsIiIDaw1Y5CwEhUEBABFQASJeFgBBoDwERUHvYKmchIAQKCIiACgDpshAQAu0hIAJqD1vlLASEQAEBEVABIF0WAkKgPQREQO1hq5yFgBAoICACKgCky0JACLSHgAioPWyVsxAQAgUEREAFgHRZCAiB9hAQAbWHrXIWAkKggIAIqACQLgsBIdAeAiKg9rBVzkJACBQQEAEVANJlISAE2kNABNQetspZCAiBAgIioAJAuiwEhEB7CIiA2sNWOQsBIVBAQARUAEiXhYAQaA8BEVB72CpnISAECgiIgAoA6bIQEALtISACag9b5SwEhEABARFQASBdFgJCoD0EREDtYauchYAQKCAgAioApMtCQAi0h4AIqD1slbMQEAIFBERABYB0WQgIgfYQEAG1h61yFgJCoICACKgAkC4LASHQHgIioPawVc5CQAgUEBABFQDSZSEgBNpDQATUHrbKWQgIgQICIqACQLosBIRAewiIgNrDVjkLASFQQEAEVABIl4WAEGgPARFQe9gqZyEgBAoIiIAKAOmyEBAC7SEgAmoPW+UsBIRAAQERUAEgXRYCQqA9BERA7WGrnIWAECggIAIqAKTLQkAItIeACKg9bJWzEBACBQREQAWAdFkICIH2EBABtYetchYCQqCAgAioAJAuCwEh0B4CIqD2sFXOQkAIFBAQARUA0mUhIATaQ0AE1B62ylkICIECAiKgAkC6LASEQHsIiIDaw1Y5CwEhUEBABFQASJeFgBBoDwERUHvYKmchIAQKCPw/uHtzZuQWP6QAAAAASUVORK5CYII=" /><!-- --></p>
+<p>(<code>ape::plot.phylo()</code> displays underscores as spaces by
+default — the underlying <code>tree$tip.label</code> strings still
+contain underscores, which is why <code>tree$tip.label</code> shows
+them.)</p>
+<p>Notice the mismatches:</p>
+<ul>
+<li><code>Pan_troglodytes</code> in the data has an underscore; the tree
+uses underscores throughout, but the data column mixes spaces and
+underscores.</li>
+<li><code>Cebus capucinus</code> is in the data but not in the
+tree.</li>
+<li><code>Papio anubis</code> is in the tree but not in the data.</li>
+</ul>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">reconcile_tree</span>(</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  <span class="at">x =</span> trait_data,</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  <span class="at">tree =</span> tree,</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>  <span class="at">x_species =</span> <span class="st">&quot;species&quot;</span>,</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>  <span class="at">authority =</span> <span class="cn">NULL</span>,        <span class="co"># skip synonym lookup for this example</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>  <span class="at">quiet =</span> <span class="cn">FALSE</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>)</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; ℹ Reconciling 6 data names vs 6 tree tips</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; ✔ Matched 5/6 data names to tree tips</span></span></code></pre></div>
+<div id="inspect-the-result" class="section level3">
+<h3>Inspect the result</h3>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">print</span>(result)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="co">#&gt; ── Reconciliation: data vs tree ────────────────────────────────────────────────</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co">#&gt;   Source x: trait_data</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co">#&gt;   Source y: phylo (6 tips)</span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="co">#&gt;   Authority: none</span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co">#&gt;   Timestamp: 2026-08-07 16:17:25</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="co">#&gt; ℹ Match coverage: [█████████████████████████░░░░░] 83% (5/6)</span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="co">#&gt; ── Match summary ──</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="co">#&gt; • Exact: 1 (16.7%)</span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="co">#&gt; • Normalized: 4 (66.7%)</span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="co">#&gt; • Synonym: 0 ( 0.0%)</span></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="co">#&gt; • Fuzzy: 0 ( 0.0%)</span></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="co">#&gt; • Manual: 0 ( 0.0%)</span></span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="co">#&gt; ! Unresolved (x only):1 (16.7%)</span></span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a><span class="co">#&gt; ! Unresolved (y only):1</span></span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a><span class="co">#&gt; ! Flagged for review: 0</span></span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a><span class="co">#&gt; ℹ Use `reconcile_summary()` for details, `reconcile_mapping()` for the full table.</span></span></code></pre></div>
+<p>The “Reconciliation: data vs tree” header at the top of the output
+tells you the call that produced the result; the “Match summary” block
+underneath gives the count in each match category (exact, normalised,
+synonym, fuzzy, manual, unresolved). Use
+<code>reconcile_mapping()</code> to see the full per-name table:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">reconcile_mapping</span>(result)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="co">#&gt; # A tibble: 7 × 9</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="co">#&gt;   name_x    name_y name_resolved match_type match_score match_source in_x  in_y </span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;     &lt;chr&gt;  &lt;chr&gt;         &lt;chr&gt;            &lt;dbl&gt; &lt;chr&gt;        &lt;lgl&gt; &lt;lgl&gt;</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="co">#&gt; 1 Pan_trog… Pan_t… &lt;NA&gt;          exact                1 exact_string TRUE  TRUE </span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co">#&gt; 2 Homo sap… Homo_… &lt;NA&gt;          normalized           1 normalisati… TRUE  TRUE </span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co">#&gt; 3 Gorilla … Goril… &lt;NA&gt;          normalized           1 normalisati… TRUE  TRUE </span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co">#&gt; 4 Pongo py… Pongo… &lt;NA&gt;          normalized           1 normalisati… TRUE  TRUE </span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="co">#&gt; 5 Macaca m… Macac… &lt;NA&gt;          normalized           1 normalisati… TRUE  TRUE </span></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="co">#&gt; 6 Cebus ca… &lt;NA&gt;   &lt;NA&gt;          unresolved          NA &lt;NA&gt;         TRUE  FALSE</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="co">#&gt; 7 &lt;NA&gt;      Papio… &lt;NA&gt;          unresolved          NA &lt;NA&gt;         FALSE TRUE </span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="co">#&gt; # ℹ 1 more variable: notes &lt;chr&gt;</span></span></code></pre></div>
+<p>What the columns mean:</p>
+<ul>
+<li><code>name_x</code> — the species name as it appeared in your
+<strong>data</strong> (the argument <code>x</code> to
+<code>reconcile_tree()</code>).</li>
+<li><code>name_y</code> — the matching tip label on your
+<strong>tree</strong> (the argument <code>tree</code> to
+<code>reconcile_tree()</code>), or <code>NA</code> if no match was
+found.</li>
+<li><code>name_resolved</code> — the canonical name used when synonym
+resolution applied (the recognised form per the chosen taxonomic
+authority). <code>NA</code> for matches that didn’t go through the
+synonym stage.</li>
+<li><code>match_type</code> — which stage of the cascade matched the
+name (see <em>Understanding match types</em> below).</li>
+<li><code>match_score</code> — confidence on <code>[0, 1]</code>
+(<code>1</code> for exact / normalised / synonym / manual;
+<code>&lt; 1</code> for fuzzy / flagged).</li>
+<li><code>in_x</code>, <code>in_y</code> — logical: was this name in the
+data, in the tree, or both?</li>
+<li><code>notes</code> — human-readable note (e.g. “normalised:
+lowercased”, “via synonym lookup against COL”, “fuzzy match score
+0.92”).</li>
+</ul>
+<p>For a detailed report:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">reconcile_summary</span>(result)</span></code></pre></div>
+</div>
+<div id="apply-manual-overrides" class="section level3">
+<h3>Apply manual overrides</h3>
+<p>Suppose you know that <code>Cebus capucinus</code> should not be in
+the analysis. You can document this decision:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">reconcile_override</span>(</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>  result,</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>  <span class="at">name_x =</span> <span class="st">&quot;Cebus capucinus&quot;</span>,</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>  <span class="at">name_y =</span> <span class="cn">NA</span>,</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>  <span class="at">action =</span> <span class="st">&quot;reject&quot;</span>,</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>  <span class="at">note =</span> <span class="st">&quot;Not in target phylogeny; exclude from analysis&quot;</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>)</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co">#&gt; ✔ Override applied: &#39;Cebus capucinus&#39; -&gt; &#39;NA&#39; (reject)</span></span></code></pre></div>
+<p><code>reconcile_override()</code> updates the existing
+<code>result</code> (the <code>reconciliation</code> you built earlier)
+in place — no need to re-run <code>reconcile_tree()</code>. The three
+actions you can pass to <code>action = ...</code> are:</p>
+<ul>
+<li><code>&quot;accept&quot;</code> — confirm a specific
+<code>name_x → name_y</code> mapping.</li>
+<li><code>&quot;reject&quot;</code> — mark a name as deliberately excluded.</li>
+<li><code>&quot;replace&quot;</code> — redirect <code>name_x</code> to a different
+<code>name_y</code> than the cascade produced.</li>
+</ul>
+</div>
+<div id="produce-aligned-objects" class="section level3">
+<h3>Produce aligned objects</h3>
+<p>Once satisfied with the reconciliation, apply it:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>aligned <span class="ot">&lt;-</span> <span class="fu">reconcile_apply</span>(</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>  result,</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>  <span class="at">data =</span> trait_data,</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>  <span class="at">tree =</span> tree,</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>  <span class="at">species_col =</span> <span class="st">&quot;species&quot;</span>,</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>  <span class="at">drop_unresolved =</span> <span class="cn">TRUE</span></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>)</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="co">#&gt; ! Dropped 1 rows with unresolved species from data</span></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="co">#&gt; ℹ Tree has 5 tips after alignment</span></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="co"># Aligned data frame — only species present in both data and tree</span></span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a>aligned<span class="sc">$</span>data</span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="co">#&gt;           species body_mass brain_mass</span></span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a><span class="co">#&gt; 1    Homo sapiens        70       1.35</span></span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a><span class="co">#&gt; 2 Pan_troglodytes        50       0.39</span></span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a><span class="co">#&gt; 3 Gorilla gorilla       160       0.50</span></span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a><span class="co">#&gt; 4  Pongo pygmaeus        80       0.37</span></span>
+<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a><span class="co">#&gt; 5  Macaca mulatta         8       0.11</span></span>
+<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a></span>
+<span id="cb9-20"><a href="#cb9-20" tabindex="-1"></a><span class="co"># Aligned tree — pruned to matched species</span></span>
+<span id="cb9-21"><a href="#cb9-21" tabindex="-1"></a>ape<span class="sc">::</span><span class="fu">Ntip</span>(aligned<span class="sc">$</span>tree)</span>
+<span id="cb9-22"><a href="#cb9-22" tabindex="-1"></a><span class="co">#&gt; [1] 5</span></span>
+<span id="cb9-23"><a href="#cb9-23" tabindex="-1"></a><span class="fu">plot</span>(aligned<span class="sc">$</span>tree)   <span class="co"># the pruned tree</span></span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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0jUgBIRAawiIgFqDXhULASEgAtI1IASEQGsIiIBag14VCwEhIALSNSAEhEBrCIiAWoNeFQsBISAC0jUgBIRAawiIgFqDXhULASEgAtI1IASEQGsIiIBag14VCwEhIALSNSAEhEBrCIiAWoNeFQsBISAC0jUgBIRAawiIgFqDXhULASEgAtI1IASEQGsIiIBag14VCwEhIALSNSAEhEBrCIiAWoNeFQsBISAC0jUgBIRAawiIgFqDXhULASEgAtI1IASEQGsIiIBag14VCwEhIAIah9fAww8/nK6++ur01a9+NbHcy7797W+na665Jv3oRz/qtVlpjyHw85//PF1//fWV8cg5p2uvvTb96le/Kvb58Y9/nMBb1jwCIqDmMV3gEs8777w0efLktOeee6YrrrhivvLmzp2b3vOe96Rdd93VSWq+DEooEJgxY0Y64ogjivV+CxD6Ouusk37zm98UWTfbbLPEOZE1j4AIqHlMF7jE733ve+nlL395esELXpB++tOfdpT33//+N+2///5pm222ST/72c/SG9/4xmL7BRdckN73vvelZz3rWU5Qp5xySvrXv/5VbGfhqquuSu9///vTcsstl1ZeeeX05S9/uWP7oMooV3rvvfemN73pTWnevHlp9913T8997nPTO97xjnT33Xd7T2STTTZJyy+/fOK3TAxbb711Ovzww8tFpaOOOiptvvnmRRpYVsXoc5/7XIJssGnTpiXWadc999yTLrroIm9bFFwFp8ir35EREAGNjE1rW7hpXvOa16QXvvCF8xHQnDlz0h/+8If0+te/3tv3hje8wX/pFUEs7APxcNNxM5999tnFcXz9619PG220UVp88cXT8ccfn1ZYYYW0/fbbp3/84x8DLaNo0GML3/nOdxLH/OEPfzg98YlPTJ/5zGecfD70oQ+lDTfcMHGMxx13nA85zzjjDN/rP//5T7r44ovTUkst1VHclVdemZ7whP+/rP/4xz+mX//61wUB9cNowoQJ6XnPe156yUte4m15y1vektZYY43EsGz69OkJwsP6ldPRIK2MjoCBK2sQARs25dVWWy1PmTKl9mfmzJn5n//8Z37yk5+c7Z89z5o1K9s/cNG6v/3tb/n5z39+Pvroo7P9Q+dXvOIVvu3f//533mCDDfLBBx9c5GXh3e9+t6ez/NBDD2Ujp7zddtux6nb//fdn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" /><!-- --></p>
+<p>The <code>$data</code> and <code>$tree</code> components now have
+matching species, ready for comparative analysis.</p>
+</div>
+</div>
+<div id="example-2-reconcile-two-datasets" class="section level2">
+<h2>Example 2: Reconcile two datasets</h2>
+<p><code>prepR4pcm</code> can also reconcile species names <em>between
+two datasets</em>, not just between a dataset and a tree. The same
+matching cascade applies. This is useful when merging trait data from
+different sources, where species names often disagree across datasets.
+Here is a toy example:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="co"># df1: body mass for three primates (df1 uses an underscore for chimp)</span></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>df1 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>  <span class="at">species =</span> <span class="fu">c</span>(<span class="st">&quot;Homo sapiens&quot;</span>, <span class="st">&quot;Pan_troglodytes&quot;</span>, <span class="st">&quot;Gorilla gorilla&quot;</span>),</span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>  <span class="at">mass =</span> <span class="fu">c</span>(<span class="dv">70</span>, <span class="dv">50</span>, <span class="dv">160</span>)</span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>)</span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="co"># df2: lifespan for three primates (df2 uses a space for chimp; orang</span></span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a><span class="co"># is here but not gorilla)</span></span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a>df2 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a>  <span class="at">species =</span> <span class="fu">c</span>(<span class="st">&quot;Homo sapiens&quot;</span>, <span class="st">&quot;Pan troglodytes&quot;</span>, <span class="st">&quot;Pongo pygmaeus&quot;</span>),</span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a>  <span class="at">lifespan =</span> <span class="fu">c</span>(<span class="dv">79</span>, <span class="dv">40</span>, <span class="dv">45</span>)</span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a>)</span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a></span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a><span class="co"># Reconcile the species columns of df1 and df2 against each other.</span></span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a><span class="co"># `authority = NULL` skips the synonym-lookup stage (no taxonomic</span></span>
+<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a><span class="co"># database needed for this small example). `quiet = TRUE` suppresses</span></span>
+<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a><span class="co"># progress messages.</span></span>
+<span id="cb10-18"><a href="#cb10-18" tabindex="-1"></a>result2 <span class="ot">&lt;-</span> <span class="fu">reconcile_data</span>(</span>
+<span id="cb10-19"><a href="#cb10-19" tabindex="-1"></a>  <span class="at">x =</span> df1,</span>
+<span id="cb10-20"><a href="#cb10-20" tabindex="-1"></a>  <span class="at">y =</span> df2,</span>
+<span id="cb10-21"><a href="#cb10-21" tabindex="-1"></a>  <span class="at">authority =</span> <span class="cn">NULL</span>,</span>
+<span id="cb10-22"><a href="#cb10-22" tabindex="-1"></a>  <span class="at">quiet =</span> <span class="cn">TRUE</span></span>
+<span id="cb10-23"><a href="#cb10-23" tabindex="-1"></a>)</span>
+<span id="cb10-24"><a href="#cb10-24" tabindex="-1"></a><span class="co">#&gt; ℹ Auto-detected species column: species</span></span>
+<span id="cb10-25"><a href="#cb10-25" tabindex="-1"></a><span class="co">#&gt; ℹ Auto-detected species column: species</span></span>
+<span id="cb10-26"><a href="#cb10-26" tabindex="-1"></a></span>
+<span id="cb10-27"><a href="#cb10-27" tabindex="-1"></a><span class="co"># The output shows how many names matched, and via which stage.</span></span>
+<span id="cb10-28"><a href="#cb10-28" tabindex="-1"></a><span class="fu">print</span>(result2)</span>
+<span id="cb10-29"><a href="#cb10-29" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-30"><a href="#cb10-30" tabindex="-1"></a><span class="co">#&gt; ── Reconciliation: data vs data ────────────────────────────────────────────────</span></span>
+<span id="cb10-31"><a href="#cb10-31" tabindex="-1"></a><span class="co">#&gt;   Source x: df1</span></span>
+<span id="cb10-32"><a href="#cb10-32" tabindex="-1"></a><span class="co">#&gt;   Source y: df2</span></span>
+<span id="cb10-33"><a href="#cb10-33" tabindex="-1"></a><span class="co">#&gt;   Authority: none</span></span>
+<span id="cb10-34"><a href="#cb10-34" tabindex="-1"></a><span class="co">#&gt;   Timestamp: 2026-08-07 16:17:26</span></span>
+<span id="cb10-35"><a href="#cb10-35" tabindex="-1"></a><span class="co">#&gt; ℹ Match coverage: [████████████████████░░░░░░░░░░] 67% (2/3)</span></span>
+<span id="cb10-36"><a href="#cb10-36" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-37"><a href="#cb10-37" tabindex="-1"></a><span class="co">#&gt; ── Match summary ──</span></span>
+<span id="cb10-38"><a href="#cb10-38" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-39"><a href="#cb10-39" tabindex="-1"></a><span class="co">#&gt; • Exact: 1 (33.3%)</span></span>
+<span id="cb10-40"><a href="#cb10-40" tabindex="-1"></a><span class="co">#&gt; • Normalized: 1 (33.3%)</span></span>
+<span id="cb10-41"><a href="#cb10-41" tabindex="-1"></a><span class="co">#&gt; • Synonym: 0 ( 0.0%)</span></span>
+<span id="cb10-42"><a href="#cb10-42" tabindex="-1"></a><span class="co">#&gt; • Fuzzy: 0 ( 0.0%)</span></span>
+<span id="cb10-43"><a href="#cb10-43" tabindex="-1"></a><span class="co">#&gt; • Manual: 0 ( 0.0%)</span></span>
+<span id="cb10-44"><a href="#cb10-44" tabindex="-1"></a><span class="co">#&gt; ! Unresolved (x only):1 (33.3%)</span></span>
+<span id="cb10-45"><a href="#cb10-45" tabindex="-1"></a><span class="co">#&gt; ! Unresolved (y only):1</span></span>
+<span id="cb10-46"><a href="#cb10-46" tabindex="-1"></a><span class="co">#&gt; ! Flagged for review: 0</span></span>
+<span id="cb10-47"><a href="#cb10-47" tabindex="-1"></a><span class="co">#&gt; ℹ Use `reconcile_summary()` for details, `reconcile_mapping()` for the full table.</span></span></code></pre></div>
+<p><code>Pan_troglodytes</code> (underscore) in <code>df1</code> is
+matched to <code>Pan troglodytes</code> (space) in <code>df2</code> via
+normalisation. <code>Gorilla gorilla</code> is in <code>df1</code> only
+and <code>Pongo pygmaeus</code> is in <code>df2</code> only — both end
+up as <code>unresolved</code> rows
+(<code>in_x = TRUE, in_y = FALSE</code> and vice versa).</p>
+</div>
+<div id="understanding-match-types" class="section level2">
+<h2>Understanding match types</h2>
+<p>Every row in the <code>reconcile_mapping()</code> output has a
+<code>match_type</code> column. Here is what each value means and what
+action (if any) it requires:</p>
+<table>
+<colgroup>
+<col width="37%" />
+<col width="22%" />
+<col width="40%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><code>match_type</code></th>
+<th>Meaning</th>
+<th>Action needed?</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>exact</code></td>
+<td>Verbatim string equality</td>
+<td>None</td>
+</tr>
+<tr class="even">
+<td><code>normalized</code></td>
+<td>Names matched after stripping underscores, authority strings, and
+case differences</td>
+<td>None — check the <code>notes</code> column if you want to
+confirm</td>
+</tr>
+<tr class="odd">
+<td><code>synonym</code></td>
+<td>Names resolved through a taxonomic authority (e.g., Catalogue of
+Life) to the same accepted name</td>
+<td>Verify the resolved name looks correct</td>
+</tr>
+<tr class="even">
+<td><code>fuzzy</code></td>
+<td>High-confidence character-level match (score ≥
+<code>flag_threshold</code>, default 0.95)</td>
+<td>Check the <code>match_score</code> column; review with
+<code>reconcile_suggest()</code></td>
+</tr>
+<tr class="odd">
+<td><code>flagged</code></td>
+<td>Lower-confidence match that needs human review: fuzzy score below
+<code>flag_threshold</code>, or an indirect synonym chain</td>
+<td>Review with <code>reconcile_review()</code> or
+<code>reconcile_suggest()</code></td>
+</tr>
+<tr class="even">
+<td><code>manual</code></td>
+<td>Set by <code>reconcile_override()</code> or the
+<code>overrides</code> argument</td>
+<td>None — you decided this</td>
+</tr>
+<tr class="odd">
+<td><code>unresolved</code></td>
+<td>No match found after all stages</td>
+<td>Investigate; use <code>reconcile_suggest()</code> for candidates or
+<code>reconcile_override()</code> to document a decision</td>
+</tr>
+</tbody>
+</table>
+<p>Use
+<code>reconcile_summary(result, detail = &quot;mismatches_only&quot;)</code> to
+see only the rows that need attention.</p>
+</div>
+<div id="example-3-using-a-taxonomic-authority" class="section level2">
+<h2>Example 3: Using a taxonomic authority</h2>
+<p>A <em>taxonomic authority</em> is a curated database of species names
+that records, for each name, which is the currently-recognised one and
+which are synonyms (alternative names referring to the same taxon).
+prepR4pcm can use such an authority to recognise that two syntactically
+different names refer to the same species — the “synonym” stage of the
+matching cascade.</p>
+<p>Most authorities below are <strong>databases served by the <a href="https://docs.ropensci.org/taxadb/">taxadb</a> package</strong>
+(Norman et al. 2020) — <code>authority = &quot;col&quot;</code> tells
+<code>prepR4pcm</code> to look up synonyms in the taxadb-cached copy of
+the Catalogue of Life, and so on. The first call for a taxadb provider
+downloads its database to your local cache (~100 MB); subsequent calls
+are fast and work offline. One alternative, <code>&quot;gnverifier&quot;</code>,
+is HTTP-backed instead of taxadb: it calls the <a href="https://verifier.globalnames.org/">Global Names verifier</a> on
+each lookup. No database to download, but each lookup needs network
+access and the package.</p>
+<ul>
+<li><strong><code>col</code></strong> — Catalogue of Life (<a href="https://www.catalogueoflife.org/">catalogueoflife.org</a>). Broad
+coverage; the most general default for cross-taxon work.</li>
+<li><strong><code>itis</code></strong> — Integrated Taxonomic
+Information System (<a href="https://www.itis.gov/about_itis.html">itis.gov</a>).
+North-American emphasis, strong on vertebrates and vascular plants.</li>
+<li><strong><code>gbif</code></strong> — Global Biodiversity Information
+Facility taxonomic backbone (dataset
+<code>d7dddbf4-2cf0-4f39-9b2a-bb099caae36c</code>). Pragmatic synthesis
+with very wide coverage.</li>
+<li><strong><code>ncbi</code></strong> — NCBI Taxonomy (<a href="https://www.ncbi.nlm.nih.gov/taxonomy">ncbi.nlm.nih.gov/taxonomy</a>).
+Tracks names that appear in GenBank — most useful for molecular-data
+workflows.</li>
+<li><strong><code>ott</code></strong> — Open Tree Taxonomy (<a href="https://tree.opentreeoflife.org/about/taxonomy-version">tree.opentreeoflife.org/about/taxonomy-version</a>).
+Note: <code>ott</code> here is a taxadb authority name, not an R
+package. The R package that <em>retrieves trees</em> from Open Tree of
+Life is called <a href="https://docs.ropensci.org/rotl/"><code>rotl</code></a>, which is
+separate. Use <code>authority = &quot;ott&quot;</code> if you also use
+<code>pr_get_tree(source = &quot;rotl&quot;)</code> and want the
+synonym-resolution step to use the same taxonomy as the tree.</li>
+<li><strong><code>itis_test</code></strong> — small bundled subset of
+ITIS used for the package’s own examples and tests; not a
+general-purpose authority.</li>
+<li><strong><code>gnverifier</code></strong> — Global Names verifier (<a href="https://verifier.globalnames.org/">verifier.globalnames.org</a>).
+Verifies names against ~100 authoritative sources (CoL, ITIS, GBIF,
+NCBI, Open Tree, …) in one HTTP call. Wider source coverage than any
+single taxadb provider and no ~100 MB local download, but each call
+needs network access and the package.</li>
+</ul>
+<p>The taxadb-backed entries mirror the providers documented in
+<code>?taxadb::td_create</code>.</p>
+<p><strong>When should you set <code>authority</code>?</strong></p>
+<p>Use <code>authority = NULL</code> (skip synonym lookup) when:</p>
+<ul>
+<li>You want a quick offline check — no database download required.</li>
+<li>Species names in your data and tree are unlikely to differ much
+(most formatting differences are caught by the normalisation stage
+anyway).</li>
+</ul>
+<p>Set <code>authority = &quot;col&quot;</code> (or another taxadb provider) when
+names differ because of genuine taxonomic revisions — species moved to a
+different genus, splits, or lumps. The first run downloads a local
+database (~100 MB); subsequent runs are fast because the database is
+cached.</p>
+<p>Use <code>authority = &quot;gnverifier&quot;</code> when you would rather query
+the Global Names verifier over HTTP than maintain a local taxadb
+database. It is the right pick when you want broader source coverage
+than any one taxadb provider (it consults ~100 sources per call), when
+you do not want to download a ~100 MB cache, or when you would like the
+synonym stage to silently benefit from upstream-source improvements
+without re-downloading anything. The trade-off: every call needs network
+access (we degrade to “name not found” on failure, so the rest of the
+cascade still runs), and the request adds a round-trip to
+<code>verifier.globalnames.org</code>. Install
+(<code>install.packages(&quot;httr2&quot;)</code>) before first use.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="co"># Requires taxadb and a local database download (automatic on first use)</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>result3 <span class="ot">&lt;-</span> <span class="fu">reconcile_tree</span>(</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>  <span class="at">x =</span> trait_data,</span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>  <span class="at">tree =</span> tree,</span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>  <span class="at">x_species =</span> <span class="st">&quot;species&quot;</span>,</span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a>  <span class="at">authority =</span> <span class="st">&quot;col&quot;</span>        <span class="co"># Catalogue of Life</span></span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+<div id="example-4-pre-built-overrides" class="section level2">
+<h2>Example 4: Pre-built overrides</h2>
+<p>Researchers often maintain a curated list of known corrections. You
+can pass these as a data frame, or as a path to a file in CSV
+format:</p>
+<blockquote>
+<p>The chunks below use <code>my_data</code> and <code>my_tree</code> as
+<strong>hypothetical</strong> objects (substitute your own data frame
+and <code>phylo</code> object). They are marked
+<code>eval = FALSE</code> so the vignette renders without requiring
+those objects to exist.</p>
+</blockquote>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="co"># A data frame of known corrections</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>corrections <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>  <span class="at">name_x =</span> <span class="fu">c</span>(<span class="st">&quot;Corvus sp.&quot;</span>, <span class="st">&quot;Turdus merulaa&quot;</span>),</span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>  <span class="at">name_y =</span> <span class="fu">c</span>(<span class="st">&quot;Corvus corax&quot;</span>, <span class="st">&quot;Turdus merula&quot;</span>),</span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>  <span class="at">user_note =</span> <span class="fu">c</span>(<span class="st">&quot;Only one Corvus in our tree&quot;</span>, <span class="st">&quot;Typo in source data&quot;</span>)</span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a>)</span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a></span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a>result4 <span class="ot">&lt;-</span> <span class="fu">reconcile_tree</span>(</span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a>  <span class="at">x =</span> my_data,</span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a>  <span class="at">tree =</span> my_tree,</span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a>  <span class="at">overrides =</span> corrections</span>
+<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a>)</span>
+<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a></span>
+<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a><span class="co"># Or from a CSV file:</span></span>
+<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a>result5 <span class="ot">&lt;-</span> <span class="fu">reconcile_tree</span>(</span>
+<span id="cb12-16"><a href="#cb12-16" tabindex="-1"></a>  <span class="at">x =</span> my_data,</span>
+<span id="cb12-17"><a href="#cb12-17" tabindex="-1"></a>  <span class="at">tree =</span> my_tree,</span>
+<span id="cb12-18"><a href="#cb12-18" tabindex="-1"></a>  <span class="at">overrides =</span> <span class="st">&quot;lab_corrections.csv&quot;</span></span>
+<span id="cb12-19"><a href="#cb12-19" tabindex="-1"></a>)</span></code></pre></div>
+<p>Overrides are applied before any other matching stage, so they always
+take priority. This is useful for corrections that you have already
+reviewed and locked down. For published taxonomy crosswalks, use
+<code>reconcile_crosswalk_supplement()</code> when you want the
+crosswalk to add matches only after the baseline cascade has protected
+exact and normalised matches. Use <code>one_to_one_only = TRUE</code>
+for automatic rows and review split/lump cases before applying them.</p>
+</div>
+<div id="example-5-multiple-datasets-against-one-tree" class="section level2">
+<h2>Example 5: Multiple datasets against one tree</h2>
+<p><code>reconcile_multi()</code> reconciles several datasets at once,
+pooling all unique species names before running the cascade:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="co"># Suppose you have several data frames to reconcile against one tree.</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a><span class="co"># `my_ecology_data`, `my_morpho_data`, and `my_tree` are **hypothetical**</span></span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a><span class="co"># user-supplied objects; substitute your own.</span></span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>datasets <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>  <span class="at">traits  =</span> trait_data,        <span class="co"># defined above</span></span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a>  <span class="at">ecology =</span> my_ecology_data,   <span class="co"># your own data frame</span></span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a>  <span class="at">morpho  =</span> my_morpho_data     <span class="co"># your own data frame</span></span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a>)</span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a>result6 <span class="ot">&lt;-</span> <span class="fu">reconcile_multi</span>(datasets, my_tree)</span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a><span class="fu">print</span>(result6)</span></code></pre></div>
+</div>
+<div id="key-design-principles" class="section level2">
+<h2>Key design principles</h2>
+<ol style="list-style-type: decimal">
+<li><strong>Conservative</strong>: Names are never silently changed.
+Ambiguous cases are flagged, not auto-resolved.</li>
+<li><strong>Transparent</strong>: Every decision is recorded with match
+type, score, source, and a human-readable note.</li>
+<li><strong>Reproducible</strong>: Database versions are pinned. All
+parameters used to build the result are stored on the result object
+itself, so a collaborator can re-run the same reconciliation later.</li>
+<li><strong>Practical</strong>: Works with the data types comparative
+biologists already use — a <code>data.frame</code> of trait values (one
+row per species) and a phylogenetic tree as an <code>ape::phylo</code>
+object.</li>
+</ol>
+</div>
+<div id="typical-workflow" class="section level2">
+<h2>Typical workflow</h2>
+<blockquote>
+<p>The chunk below uses <strong>hypothetical</strong> files
+(<code>species_traits.csv</code>, <code>species_tree.nwk</code>) —
+substitute your own paths. The chunk is marked <code>eval = FALSE</code>
+so it doesn’t try to read files that don’t exist when the vignette is
+rendered.</p>
+</blockquote>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="fu">library</span>(prepR4pcm)</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a><span class="co"># 1. Load your data and tree (hypothetical paths -- substitute your own)</span></span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>my_data <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">&quot;species_traits.csv&quot;</span>)</span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a>my_tree <span class="ot">&lt;-</span> ape<span class="sc">::</span><span class="fu">read.tree</span>(<span class="st">&quot;species_tree.nwk&quot;</span>)</span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a><span class="co"># 2. Reconcile</span></span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">reconcile_tree</span>(my_data, my_tree, <span class="at">authority =</span> <span class="st">&quot;col&quot;</span>)</span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a></span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a><span class="co"># 3. Review</span></span>
+<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a><span class="fu">print</span>(result)</span>
+<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a><span class="fu">reconcile_summary</span>(result, <span class="at">detail =</span> <span class="st">&quot;mismatches_only&quot;</span>)</span>
+<span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a></span>
+<span id="cb14-14"><a href="#cb14-14" tabindex="-1"></a><span class="co"># 4. Fix manually if needed</span></span>
+<span id="cb14-15"><a href="#cb14-15" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">reconcile_override</span>(result, <span class="st">&quot;Corvus sp.&quot;</span>, <span class="st">&quot;Corvus corax&quot;</span>,</span>
+<span id="cb14-16"><a href="#cb14-16" tabindex="-1"></a>                             <span class="at">note =</span> <span class="st">&quot;Only one Corvus in tree&quot;</span>)</span>
+<span id="cb14-17"><a href="#cb14-17" tabindex="-1"></a></span>
+<span id="cb14-18"><a href="#cb14-18" tabindex="-1"></a><span class="co"># 5. Apply</span></span>
+<span id="cb14-19"><a href="#cb14-19" tabindex="-1"></a>aligned <span class="ot">&lt;-</span> <span class="fu">reconcile_apply</span>(result, <span class="at">data =</span> my_data, <span class="at">tree =</span> my_tree,</span>
+<span id="cb14-20"><a href="#cb14-20" tabindex="-1"></a>                            <span class="at">drop_unresolved =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb14-21"><a href="#cb14-21" tabindex="-1"></a></span>
+<span id="cb14-22"><a href="#cb14-22" tabindex="-1"></a><span class="co"># 6. Analyse</span></span>
+<span id="cb14-23"><a href="#cb14-23" tabindex="-1"></a><span class="co"># aligned$data and aligned$tree are ready for caper, phytools, MCMCglmm, etc.</span></span></code></pre></div>
+</div>
+<div id="references" class="section level2">
+<h2>References</h2>
+<ul>
+<li>Hadfield, J.D. (2010) MCMC methods for multi-response generalized
+linear mixed models: the MCMCglmm R package. <em>Journal of Statistical
+Software</em> 33:1–22. DOI 10.18637/jss.v033.i02</li>
+<li>Orme, D., Freckleton, R., Thomas, G., Petzoldt, T., Fritz, S.,
+Isaac, N. &amp; Pearse, W. (2025) caper: Comparative Analyses of
+Phylogenetics and Evolution in R. R package version 1.0.4. DOI
+10.32614/CRAN.package.caper</li>
+<li>Paradis, E. &amp; Schliep, K. (2019) ape 5.0: an environment for
+modern phylogenetics and evolutionary analyses in R.
+<em>Bioinformatics</em> 35:526–528. DOI
+10.1093/bioinformatics/bty633</li>
+<li>Revell, L.J. (2024) phytools 2.0: an updated R ecosystem for
+phylogenetic comparative methods (and other things). <em>PeerJ</em>
+12:e16505. DOI 10.7717/peerj.16505</li>
+</ul>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

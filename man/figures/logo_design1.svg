@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 577" width="500" height="577">
+  <!-- Design 1: "Tree-Data Connection" — layout shifted up -->
+  <defs>
+    <linearGradient id="bg1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#347a66"/>
+      <stop offset="100%" stop-color="#1e4a3c"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Hex shape with gold border -->
+  <polygon points="250,14 488,150 488,428 250,564 12,428 12,150"
+           fill="url(#bg1)" stroke="#f0c75e" stroke-width="8"
+           stroke-linejoin="round"/>
+  <!-- Inner hex accent border -->
+  <polygon points="250,30 474,158 474,420 250,548 26,420 26,158"
+           fill="none" stroke="#f0c75e" stroke-width="2" opacity="0.3"
+           stroke-linejoin="round"/>
+
+  <!-- ===== Phylogenetic tree (left side) — shifted up ~80px ===== -->
+  <g stroke="#ffffff" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Root -->
+    <path d="M 80,250 H 130"/>
+    <!-- First split -->
+    <path d="M 130,180 V 320"/>
+    <!-- Upper clade -->
+    <path d="M 130,180 H 175"/>
+    <path d="M 175,155 V 210"/>
+    <path d="M 175,155 H 215"/>
+    <path d="M 175,210 H 215"/>
+    <!-- Lower clade -->
+    <path d="M 130,320 H 175"/>
+    <path d="M 175,290 V 350"/>
+    <path d="M 175,290 H 215"/>
+    <path d="M 175,350 H 215"/>
+  </g>
+
+  <!-- Tip circles -->
+  <g fill="#f0c75e">
+    <circle cx="222" cy="155" r="7"/>
+    <circle cx="222" cy="210" r="7"/>
+    <circle cx="222" cy="290" r="7"/>
+    <circle cx="222" cy="350" r="7"/>
+  </g>
+
+  <!-- ===== Connecting dashed lines ===== -->
+  <g stroke="#f0c75e" stroke-width="2" stroke-dasharray="5,4" fill="none" opacity="0.7">
+    <path d="M 235,155 H 300"/>
+    <path d="M 235,210 H 300"/>
+    <path d="M 235,290 H 300"/>
+    <path d="M 235,350 H 300"/>
+  </g>
+
+  <!-- ===== Data table (right side) — shifted up ===== -->
+  <g stroke="#ffffff" stroke-width="2.5" fill="none" stroke-linecap="round">
+    <!-- Table frame -->
+    <rect x="300" y="135" width="140" height="235" rx="8" ry="8"/>
+    <!-- Header line -->
+    <line x1="300" y1="175" x2="440" y2="175"/>
+    <!-- Row separators -->
+    <line x1="300" y1="230" x2="440" y2="230"/>
+    <line x1="300" y1="290" x2="440" y2="290"/>
+    <!-- Column separator -->
+    <line x1="370" y1="135" x2="370" y2="370"/>
+  </g>
+
+  <!-- Header cells -->
+  <g fill="#ffffff" opacity="0.25">
+    <rect x="310" y="143" width="52" height="24" rx="3"/>
+    <rect x="378" y="143" width="52" height="24" rx="3"/>
+  </g>
+
+  <!-- Data-row highlight circles -->
+  <g fill="#f0c75e" opacity="0.6">
+    <circle cx="335" cy="203" r="5"/>
+    <circle cx="335" cy="260" r="5"/>
+    <circle cx="335" cy="320" r="5"/>
+    <circle cx="335" cy="350" r="5"/>
+  </g>
+
+  <!-- ===== Package name ===== -->
+  <text x="250" y="455" text-anchor="middle" fill="#ffffff"
+        font-family="'Fira Sans','Helvetica Neue',Arial,sans-serif"
+        font-size="46" font-weight="700" letter-spacing="1">
+    prepR4pcm
+  </text>
+
+</svg>

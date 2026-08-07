@@ -1,0 +1,553 @@
+---
+title: "From Raw Data to PCM: A Complete Bird Trait Workflow"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{From Raw Data to PCM: A Complete Bird Trait Workflow}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+This vignette walks through a real comparative biology workflow using
+avian trait data and a phylogenetic tree. The same approach applies to
+any taxon group --- mammals, fish, amphibians, plants --- the functions
+are fully taxon-agnostic.
+
+## Setup
+
+```{r setup}
+library(prepR4pcm)
+```
+
+# Part I: Core Workflow
+
+The typical workflow has four steps: load your data and tree, reconcile
+the names, produce aligned objects, and run your analysis.
+
+## Step 1: Load data and tree
+
+```{r load-data}
+data(avonet_subset)    # AVONET morphological traits (Tobias et al. 2022)
+data(tree_jetz)    # Jetz et al. (2012) phylogeny, Corvoidea + allies
+
+cat(sprintf("Data: %d species\n", nrow(avonet_subset)))
+cat(sprintf("Tree: %d tips\n", ape::Ntip(tree_jetz)))
+
+# The data uses spaces; the tree uses underscores
+head(avonet_subset$Species1, 3)
+head(tree_jetz$tip.label, 3)
+```
+
+These formatting differences --- spaces vs underscores, minor spelling
+variants, taxonomic synonyms --- are exactly what prepR4pcm resolves.
+
+## Step 2: Reconcile data against the tree
+
+```{r reconcile-tree}
+result <- reconcile_tree(
+  x = avonet_subset,
+  tree = tree_jetz,
+  x_species = "Species1",
+  authority = NULL       # skip synonym lookup for speed
+)
+print(result)
+```
+
+The reconciliation object records every name-matching decision.
+Inspect the mapping to see what happened:
+
+```{r mapping}
+mapping <- reconcile_mapping(result)
+
+# Match type breakdown
+table(mapping$match_type)
+
+# Show normalised matches (formatting differences resolved automatically)
+norm <- mapping[mapping$match_type == "normalized",
+                c("name_x", "name_y", "notes")]
+if (nrow(norm) > 0) head(norm, 5)
+
+# Unresolved: in data but not in tree
+unresolved <- mapping[mapping$match_type == "unresolved" & mapping$in_x, ]
+cat(sprintf("\nSpecies in data but not in tree: %d\n", nrow(unresolved)))
+```
+
+For a detailed report:
+
+```{r summary, eval = FALSE}
+reconcile_summary(result, detail = "mismatches_only")
+```
+
+## Step 3: Produce aligned objects
+
+Drop unresolved species to get a matched data frame and tree, ready
+for comparative analysis:
+
+```{r apply}
+aligned <- reconcile_apply(
+  result,
+  data = avonet_subset,
+  tree = tree_jetz,
+  species_col = "Species1",
+  drop_unresolved = TRUE
+)
+
+cat(sprintf("Aligned data: %d rows\nAligned tree: %d tips\n",
+            nrow(aligned$data), ape::Ntip(aligned$tree)))
+```
+
+## Step 4: Run a comparative analysis
+
+With aligned data and tree, you are ready for any phylogenetic
+comparative method. Here are two common approaches.
+
+### Phylogenetic generalised least squares (PGLS)
+
+PGLS accounts for shared evolutionary history when estimating
+regression parameters:
+
+```{r pgls, message = FALSE, warning = FALSE, eval = requireNamespace("caper", quietly = TRUE)}
+library(caper)
+
+# reconcile_apply() aligns names so data$Species1 matches tree tip labels
+cd <- comparative.data(aligned$tree, aligned$data,
+                       names.col = "Species1", vcv = TRUE)
+
+# PGLS: body mass ~ wing length
+model_pgls <- pgls(log(Mass) ~ log(Wing.Length), data = cd)
+summary(model_pgls)
+```
+
+### Phylogenetic generalised linear mixed model (PGLMM)
+
+When you need random effects beyond phylogeny or want a Bayesian
+framework, use a PGLMM. The MCMCglmm package fits Bayesian
+phylogenetic mixed models:
+
+```{r pglmm, message = FALSE, warning = FALSE, results = "hide", eval = requireNamespace("MCMCglmm", quietly = TRUE)}
+library(MCMCglmm)
+
+# Species column as the phylogenetic grouping factor
+aligned$data$phylo <- aligned$data$Species1
+
+# Inverse phylogenetic covariance matrix
+# Replace any zero-length branches (can arise after pruning)
+tree_mcmc <- aligned$tree
+tree_mcmc$edge.length[tree_mcmc$edge.length < .Machine$double.eps] <- 1e-6
+inv_phylo <- inverseA(tree_mcmc, nodes = "ALL", scale = FALSE)
+
+# PGLMM: continuous response
+prior <- list(R = list(V = 1, nu = 0.002),
+              G = list(G1 = list(V = 1, nu = 0.002)))
+
+model_mcmc <- MCMCglmm(
+  log(Mass) ~ log(Wing.Length) + Trophic.Level,
+  random = ~phylo,
+  family = "gaussian",
+  ginverse = list(phylo = inv_phylo$Ainv),
+  data = aligned$data,
+  prior = prior,
+  nitt = 50000, burnin = 10000, thin = 20,
+  verbose = FALSE
+)
+```
+
+```{r pglmm-summary, eval = requireNamespace("MCMCglmm", quietly = TRUE)}
+summary(model_mcmc)
+```
+
+For categorical responses (e.g., migration status with multiple
+categories), see Mizuno et al. (2025, *J. Evol. Biol.*
+38:1699--1715) for the multinomial PGLMM approach and the
+accompanying tutorial at
+<https://ayumi-495.github.io/multinomial-GLMM-tutorial/>.
+
+See Hadfield (2010, *J. Stat. Softw.* 33:1--22) for MCMCglmm
+details, Hadfield & Nakagawa (2010, *J. Evol. Biol.* 23:494--508)
+for phylogenetic quantitative genetics, and Mizuno et al. (2025,
+*J. Evol. Biol.* 38:1699--1715) for phylogenetic multinomial
+mixed models.
+
+That is the complete core workflow: **load, reconcile, apply, analyse.**
+
+---
+
+# Part II: Advanced Topics
+
+## Reconciling two datasets
+
+If you need to harmonise species names across two trait datasets
+*before* matching to a tree, use `reconcile_data()`:
+
+```{r reconcile-data}
+data(nesttrait_subset)   # Nest traits (Chia et al. 2023)
+
+rec_data <- reconcile_data(
+  x = nesttrait_subset,
+  y = avonet_subset,
+  x_species = "Scientific_name",
+  y_species = "Species1",
+  authority = NULL,
+  quiet = TRUE
+)
+print(rec_data)
+```
+
+Once reconciled, merge the two datasets into a single data frame:
+
+```{r merge-data}
+merged <- reconcile_merge(
+  rec_data,
+  data_x = nesttrait_subset,
+  data_y = avonet_subset,
+  species_col_x = "Scientific_name",
+  species_col_y = "Species1"
+)
+cat(sprintf("Merged: %d rows, %d columns\n", nrow(merged), ncol(merged)))
+```
+
+### Multi-row species
+
+`reconcile_merge()` assumes one row per species in each data frame. If
+a species appears in multiple rows (e.g. sex-specific measurements,
+repeated populations, or individual-level records), the merge produces
+all pairwise combinations for that species --- the same behaviour as
+base `merge()`. `reconcile_merge()` warns when it detects duplicates
+so that you are not surprised by row expansion.
+
+There are two sensible ways to handle multi-row data:
+
+**Option A. Aggregate first, merge second.** If your downstream PCM
+expects one row per species (most PGLS and PGLMM workflows do), collapse
+to a species-level summary before merging:
+
+```{r multirow-aggregate, eval = FALSE}
+# Example: averaging individual measurements to species means
+species_means <- aggregate(
+  cbind(Mass, Wing.Length) ~ Species1,
+  data = individual_measurements,
+  FUN  = mean
+)
+merged <- reconcile_merge(rec_data, species_means, avonet_subset,
+                          species_col_x = "Species1",
+                          species_col_y = "Species1")
+```
+
+**Option B. Reconcile once, join the mapping back to the full data.**
+If you want to keep every row (e.g. for an individual-level PGLMM), build
+the reconciliation on a species-level summary and then use the mapping as
+a lookup table for the original, multi-row data:
+
+```{r multirow-lookup, eval = FALSE}
+# Reconcile on unique species
+species_level <- data.frame(
+  Species1 = unique(individual_measurements$Species1)
+)
+rec <- reconcile_data(species_level, avonet_subset,
+                      x_species = "Species1", y_species = "Species1",
+                      authority = NULL, quiet = TRUE)
+
+# Join the mapping back to the full, multi-row dataset
+mapping <- reconcile_mapping(rec)
+individual_measurements$species_resolved <- mapping$name_resolved[
+  match(individual_measurements$Species1, mapping$name_x)
+]
+```
+
+### Asymmetric datasets
+
+A common situation in comparative biology is merging a small focal
+dataset against a much larger reference (e.g. a field study of
+50 species against AVONET's ~10,000). `reconcile_merge()` accepts
+datasets of any size, but the `how` argument matters:
+
+```{r asymmetric, eval = FALSE}
+# Keep only species present in both: inner join
+inner <- reconcile_merge(rec_data, small_data, large_data,
+                         species_col_x = "species",
+                         species_col_y = "Species1",
+                         how = "inner")
+
+# Keep all small_data rows; fill large_data columns with NA
+# for species missing from the reference: left join
+left <- reconcile_merge(rec_data, small_data, large_data,
+                        species_col_x = "species",
+                        species_col_y = "Species1",
+                        how = "left")
+```
+
+Use `how = "inner"` when the analysis cannot tolerate `NA`s in the
+reference columns, and `how = "left"` when you want to retain every
+focal-study species (and you will handle missingness in the model).
+`how = "full"` is rarely what you want here --- it would return the
+entire reference dataset padded with `NA`s for every focal trait.
+
+## Using a taxonomy crosswalk
+
+When your data and tree use different taxonomies (e.g., BirdLife data
+against a BirdTree phylogeny), a curated crosswalk can resolve names
+that automated synonym resolution misses.
+
+A crosswalk is simply a table mapping names from one system to another.
+prepR4pcm includes the BirdLife-BirdTree crosswalk as an example:
+
+```{r crosswalk}
+data(crosswalk_birdlife_birdtree)
+table(crosswalk_birdlife_birdtree$Match.type)
+```
+
+Crosswalks become override tables. Overrides are applied before the
+matching cascade, so they can preempt exact or normalised matches. For
+automatic use, start with one-to-one rows only and keep split/lump rows
+for manual review:
+
+```{r make-overrides}
+result_xw <- reconcile_crosswalk_supplement(
+  result,
+  crosswalk_birdlife_birdtree,
+  from_col = "Species1",
+  to_col = "Species3",
+  match_type_col = "Match.type",
+  one_to_one_only = TRUE,
+  quiet = TRUE
+)
+
+if (result_xw$meta$crosswalk_supplement$n_applied == 0) {
+  cat("No reviewed one-to-one crosswalk rows add matches in this subset.\n")
+}
+
+# Compare: how many more matches with the crosswalk?
+cat(sprintf("Without crosswalk: %d matched\n",
+            sum(result$mapping$in_x & result$mapping$in_y, na.rm = TRUE)))
+cat(sprintf("With crosswalk:    %d matched\n",
+            sum(result_xw$mapping$in_x & result_xw$mapping$in_y, na.rm = TRUE)))
+```
+
+**When do you need a crosswalk?** Only when your data and tree follow
+different naming authorities *and* a curated mapping exists. For most
+use cases, the automatic cascade (exact → normalised → synonym) is
+sufficient. Treat `1BL to many BT` and `Many BL to 1BT` rows as
+review candidates, not automatic matches.
+
+You can also build your own overrides manually --- it is just a data
+frame with `name_x`, `name_y`, and optionally `user_note` columns:
+
+```{r manual-overrides, eval = FALSE}
+my_overrides <- data.frame(
+  name_x    = c("Old name A", "Old name B"),
+  name_y    = c("Tree name A", "Tree name B"),
+  user_note = c("Reclassified in 2023", "Spelling correction")
+)
+result <- reconcile_tree(my_data, my_tree, overrides = my_overrides)
+```
+
+## Reconciling against multiple trees
+
+For sensitivity analyses across phylogenies, `reconcile_to_trees()`
+reconciles one dataset against several trees in one call:
+
+```{r multi-tree}
+data(tree_clements25)  # Clements 2025 tree
+
+results <- reconcile_to_trees(
+  x = avonet_subset,
+  trees = list(
+    jetz      = tree_jetz,
+    clements  = tree_clements25
+  ),
+  x_species = "Species1",
+  authority = NULL
+)
+
+# Compare overlap across trees
+sapply(results, function(r) {
+  c(matched = sum(r$mapping$in_x & r$mapping$in_y, na.rm = TRUE),
+    unresolved_x = r$counts$n_unresolved_x)
+})
+```
+
+## Fuzzy matching for typos
+
+Enable fuzzy matching to catch likely typos in species names:
+
+```{r fuzzy, eval = FALSE}
+result <- reconcile_tree(
+  x = my_data,
+  tree = my_tree,
+  fuzzy = TRUE,              # enable fuzzy matching
+  fuzzy_threshold = 0.9,     # minimum similarity (0-1)
+  resolve = "flag"           # flag low-confidence matches for review
+)
+
+# Check flagged matches
+flagged <- reconcile_mapping(result)
+flagged[flagged$match_type == "flagged", c("name_x", "name_y", "match_score")]
+```
+
+## Tree augmentation for missing species
+
+When the tree has fewer species than the data, `reconcile_apply()`
+drops the unresolved species. This loses statistical power and can
+bias the sample. `reconcile_augment()` grafts the missing species
+onto the tree using genus-level placement:
+
+```{r augment}
+aug <- reconcile_augment(
+  result,
+  tree_jetz,
+  where = "genus",                # sister to a random congener
+  branch_length = "congener_median",  # median terminal branch of congeners
+  seed = 42,                      # for reproducibility
+  quiet = TRUE
+)
+
+cat(sprintf("Original tips: %d\nAugmented tips: %d\n",
+            ape::Ntip(aug$original), ape::Ntip(aug$tree)))
+cat(sprintf("Added: %d | Skipped (no congener): %d\n",
+            nrow(aug$augmented), nrow(aug$skipped)))
+
+# Which species were added, and where?
+if (nrow(aug$augmented) > 0) head(aug$augmented[, c("species", "placed_near", "branch_length")])
+```
+
+Use the augmented tree in downstream analyses. Pass the augmented tree
+to `reconcile_apply()` — the existing reconciliation object is still
+valid as the name-mapping key, but the new tree contains the extra tips,
+so `drop_unresolved = FALSE` retains the grafted species:
+
+```{r augment-apply, eval = FALSE}
+aligned_aug <- reconcile_apply(
+  result,
+  data = avonet_subset,
+  tree = aug$tree,        # augmented tree, not the original
+  species_col = "Species1",
+  drop_unresolved = FALSE  # keep augmented tips (they are now in the tree)
+)
+```
+
+**Important caveat.** Genus-level placement assumes the missing
+species diverged similarly to its congeners, which may not hold.
+Always report which species were augmented (`aug$augmented`) and run
+sensitivity analyses comparing results with and without them.
+
+## Exporting to files
+
+Write aligned data, tree, and the full mapping table to disk:
+
+```{r export, eval = FALSE}
+out_dir <- file.path(tempdir(), "prepr4pcm-export")
+reconcile_export(
+  result,
+  data = avonet_subset,
+  tree = tree_jetz,
+  species_col = "Species1",
+  dir = out_dir,
+  prefix = "avonet_jetz"
+)
+# Writes: avonet_jetz_data.csv, avonet_jetz_tree.nex, avonet_jetz_mapping.csv
+unlink(out_dir, recursive = TRUE)
+```
+
+## HTML reports
+
+Generate a self-contained HTML report documenting every name-matching
+decision. Useful for sharing with collaborators or archiving alongside
+your analysis:
+
+```{r report, eval = FALSE}
+report_file <- tempfile(fileext = ".html")
+reconcile_report(result, file = report_file)
+unlink(report_file)
+```
+
+The report opens in any browser. It begins with the run header,
+match-coverage summary, and a small bar chart of match composition
+(Figure 1). Further down, per-match-type detail tables and the
+unresolved-species list make each decision auditable (Figure 2). The
+file is self-contained --- styles, charts, and tables are all inline
+--- so it can be archived or shared without external assets.
+
+![Top of the reconciliation report: run header, coverage summary, and match-composition chart.](../man/figures/reconcile-report-top.png){width=100%}
+
+![Lower in the report: per-match-type tables (normalised, synonym, fuzzy, flagged) and the list of unresolved species.](../man/figures/reconcile-report-tables.png){width=100%}
+
+## Key points
+
+1. **Taxon-agnostic.** This workflow works for any group --- mammals,
+   fish, amphibians, plants --- as long as you have a data frame and a
+   phylogenetic tree.
+
+2. **Provenance.** Every name-matching decision is recorded in the
+   `reconciliation` object. Use `reconcile_summary()` for a
+   human-readable report or `reconcile_mapping()` for the full table.
+
+3. **Crosswalks are optional.** Most users do not need them. The
+   automatic cascade handles formatting differences and synonyms.
+   Crosswalks help when two well-known naming authorities disagree.
+
+4. **Tree augmentation.** When the tree is incomplete,
+   `reconcile_augment()` grafts missing species using congener
+   placement --- but always run sensitivity analyses with and without
+   augmented tips.
+
+5. **Sensitivity.** `reconcile_to_trees()` makes it easy to run the
+   same analysis across multiple phylogenies.
+
+6. **Merging.** `reconcile_merge()` joins two reconciled datasets into
+   a single analysis-ready data frame, using the mapping as the join key.
+
+7. **Reports.** `reconcile_report()` generates a self-contained HTML
+   report suitable for sharing or archiving.
+
+8. **Visualisation.** `reconcile_plot()` produces a bar or pie chart of
+   match composition. `reconcile_suggest()` shows the closest fuzzy
+   candidates for unresolved species.
+
+9. **Comparison.** `reconcile_diff()` compares two reconciliation runs
+   side by side --- e.g., before and after adding a crosswalk.
+
+## Data sources
+
+- **AVONET**: Tobias et al. (2022) *Ecology Letters* 25:581--597.
+  DOI 10.1111/ele.13898
+- **NestTrait v2**: Chia et al. (2023) *Scientific Data* 10:923.
+  DOI 10.1038/s41597-023-02837-1
+- **Plumage lightness**: Delhey et al. (2019) *Ecology Letters*
+  22:726--736. DOI 10.1111/ele.13233
+- **Jetz tree**: Jetz et al. (2012) *Nature* 491:444--448.
+  DOI 10.1038/nature11631
+- **Clements 2025**: Clements et al. (2025) eBird/Clements Checklist.
+- **BirdLife-BirdTree crosswalk**: Tobias et al. (2022).
+
+## References
+
+- Hadfield, J.D. (2010) MCMC methods for multi-response generalized
+  linear mixed models: the MCMCglmm R package. *Journal of Statistical
+  Software* 33:1--22. DOI 10.18637/jss.v033.i02
+- Hadfield, J.D. & Nakagawa, S. (2010) General quantitative genetic
+  methods for comparative biology: phylogenies, taxonomies and
+  multi-trait models for continuous and categorical characters.
+  *Journal of Evolutionary Biology* 23:494--508.
+  DOI 10.1111/j.1420-9101.2009.01915.x
+- Mizuno, A., Drobniak, S.M., Williams, C., Lagisz, M. & Nakagawa, S.
+  (2025) Promoting the use of phylogenetic multinomial generalised
+  mixed-effects model to understand the evolution of discrete traits.
+  *Journal of Evolutionary Biology* 38:1699--1715.
+  DOI 10.1093/jeb/voaf116.
+  Tutorial: <https://ayumi-495.github.io/multinomial-GLMM-tutorial/>
+- Norman, K.E., Chamberlain, S. & Boettiger, C. (2020) taxadb: A
+  high-performance local taxonomic database interface. *Methods in
+  Ecology and Evolution* 11:1153--1159. DOI 10.1111/2041-210X.13440
+- Orme, D., Freckleton, R., Thomas, G., Petzoldt, T., Fritz, S.,
+  Isaac, N. & Pearse, W. (2025) caper: Comparative Analyses of
+  Phylogenetics and Evolution in R. R package version 1.0.4.
+  DOI 10.32614/CRAN.package.caper
+- Paradis, E. & Schliep, K. (2019) ape 5.0: an environment for modern
+  phylogenetics and evolutionary analyses in R. *Bioinformatics*
+  35:526--528. DOI 10.1093/bioinformatics/bty633

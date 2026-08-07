@@ -1,0 +1,1648 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Assembling mammal trait databases for phylogenetic comparative models</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">
+
+div.csl-bib-body { }
+div.csl-entry {
+clear: both;
+}
+.hanging div.csl-entry {
+margin-left:2em;
+text-indent:-2em;
+}
+div.csl-left-margin {
+min-width:2em;
+float:left;
+}
+div.csl-right-inline {
+margin-left:2em;
+padding-left:1em;
+}
+div.csl-indent {
+margin-left: 2em;
+}
+</style>
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Assembling mammal trait databases for
+phylogenetic comparative models</h1>
+
+
+
+<p>Comparative analyses often begin well before model fitting. Trait
+data are commonly assembled from multiple databases, each with its own
+species names, column names, measurement conventions, and taxonomic
+coverage. A phylogenetic tree adds one more requirement: the final trait
+table must contain species that can be matched to the tree, and the
+table and tree must be aligned before they can be used in a phylogenetic
+model.</p>
+<p>This vignette focuses on that database-assembly step. We combine
+three mammal trait datasets, reconcile their species names with a
+phylogenetic tree, and collapse the matched records into a species-level
+table. The goal is not to fit a model here, but to show how several
+databases and a tree can be brought into a single, clean object ready
+for downstream comparative analyses.</p>
+<div id="setup" class="section level2">
+<h2>Setup</h2>
+<p>The worked example draws on five packages: <strong>dplyr</strong> for
+the table manipulations, <strong>readr</strong> for tolerant number
+parsing, <strong>stringr</strong> for tidying raw species strings,
+<strong>ape</strong> for the phylogeny, and <strong>prepR4pcm</strong>
+for reconciling species names against the tree.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(readr)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">library</span>(stringr)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">library</span>(ape)</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="fu">library</span>(prepR4pcm)</span></code></pre></div>
+</div>
+<div id="load-the-example-sources" class="section level2">
+<h2>Load the example sources</h2>
+<p>The package bundles three small source tables and one small tree. The
+source tables were sampled from real database structures, using only the
+columns needed for this example. They mirror three common inputs for
+mammal comparative work: the Amniote life-history database <span class="citation">(Myhrvold et al. 2015)</span>, PanTHERIA <span class="citation">(Jones et al. 2009)</span>, and TetrapodTraits <span class="citation">(Moura et al. 2024)</span>. The bundled tree is a
+subset of the VertLife mammal phylogeny <span class="citation">(Upham et
+al. 2019)</span>; the next code chunk reports its exact tip count. For
+analysis-grade trees download the full credible set from <a href="https://vertlife.org/phylosubsets/" class="uri">https://vertlife.org/phylosubsets/</a>.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">data</span>(mammal_amniote_example)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">data</span>(mammal_pantheria_example)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="fu">data</span>(mammal_tetrapodtraits_example)</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="fu">data</span>(mammal_tree_example)</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Amniote-like source:        %d rows</span><span class="sc">\n</span><span class="st">&quot;</span>, <span class="fu">nrow</span>(mammal_amniote_example)))</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt; Amniote-like source:        4953 rows</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;PanTHERIA-like source:      %d rows</span><span class="sc">\n</span><span class="st">&quot;</span>, <span class="fu">nrow</span>(mammal_pantheria_example)))</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co">#&gt; PanTHERIA-like source:      5416 rows</span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;TetrapodTraits-like source: %d rows</span><span class="sc">\n</span><span class="st">&quot;</span>, <span class="fu">nrow</span>(mammal_tetrapodtraits_example)))</span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="co">#&gt; TetrapodTraits-like source: 5911 rows</span></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Tree:                       %d tips</span><span class="sc">\n</span><span class="st">&quot;</span>, ape<span class="sc">::</span><span class="fu">Ntip</span>(mammal_tree_example)))</span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="co">#&gt; Tree:                       5987 tips</span></span></code></pre></div>
+</div>
+<div id="step-1-compare-the-source-tables" class="section level2">
+<h2>Step 1: Compare the source tables</h2>
+<p>The three sources contain related information, but they do not use
+the same column names. This is typical when assembling trait data from
+independent databases.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>source_columns <span class="ot">&lt;-</span> tibble<span class="sc">::</span><span class="fu">tibble</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>  <span class="at">source =</span> <span class="fu">c</span>(<span class="st">&quot;Amniote&quot;</span>, <span class="st">&quot;PanTHERIA&quot;</span>, <span class="st">&quot;TetrapodTraits&quot;</span>),</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>  <span class="at">n_rows =</span> <span class="fu">c</span>(</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>    <span class="fu">nrow</span>(mammal_amniote_example),</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>    <span class="fu">nrow</span>(mammal_pantheria_example),</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>    <span class="fu">nrow</span>(mammal_tetrapodtraits_example)</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>  ),</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>  <span class="at">n_columns =</span> <span class="fu">c</span>(</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>    <span class="fu">ncol</span>(mammal_amniote_example),</span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>    <span class="fu">ncol</span>(mammal_pantheria_example),</span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>    <span class="fu">ncol</span>(mammal_tetrapodtraits_example)</span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>  ),</span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>  <span class="at">species_column =</span> <span class="fu">c</span>(<span class="st">&quot;name&quot;</span>, <span class="st">&quot;MSW05_Binomial&quot;</span>, <span class="st">&quot;Scientific.Name&quot;</span>)</span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>)</span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(source_columns)</span></code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="left">source</th>
+<th align="right">n_rows</th>
+<th align="right">n_columns</th>
+<th align="left">species_column</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Amniote</td>
+<td align="right">4953</td>
+<td align="right">5</td>
+<td align="left">name</td>
+</tr>
+<tr class="even">
+<td align="left">PanTHERIA</td>
+<td align="right">5416</td>
+<td align="right">4</td>
+<td align="left">MSW05_Binomial</td>
+</tr>
+<tr class="odd">
+<td align="left">TetrapodTraits</td>
+<td align="right">5911</td>
+<td align="right">3</td>
+<td align="left">Scientific.Name</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="step-2-standardise-the-sources" class="section level2">
+<h2>Step 2: Standardise the sources</h2>
+<p>We first convert each source into the same long-format structure. The
+result keeps one row per source record, plus a <code>source</code>
+column so the provenance of each value is retained.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>amniote_std <span class="ot">&lt;-</span> <span class="fu">prep_source</span>(</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  mammal_amniote_example,</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  <span class="at">source_name     =</span> <span class="st">&quot;AMNIOTE&quot;</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>  <span class="at">species_col     =</span> <span class="st">&quot;name&quot;</span>,</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>  <span class="at">female_mass_col =</span> <span class="st">&quot;female_body_mass_g&quot;</span>,</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>  <span class="at">adult_mass_col  =</span> <span class="st">&quot;adult_body_mass_g&quot;</span>,</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>  <span class="at">litter_size_col =</span> <span class="st">&quot;litter_or_clutch_size_n&quot;</span>,</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>  <span class="at">litter_y_col    =</span> <span class="st">&quot;litters_or_clutches_per_y&quot;</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>)</span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>pantheria_std <span class="ot">&lt;-</span> <span class="fu">prep_source</span>(</span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>  mammal_pantheria_example,</span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a>  <span class="at">source_name     =</span> <span class="st">&quot;PANTHERIA&quot;</span>,</span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a>  <span class="at">species_col     =</span> <span class="st">&quot;MSW05_Binomial&quot;</span>,</span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a>  <span class="at">adult_mass_col  =</span> <span class="st">&quot;5-1_AdultBodyMass_g&quot;</span>,</span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a>  <span class="at">litter_size_col =</span> <span class="st">&quot;15-1_LitterSize&quot;</span>,</span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a>  <span class="at">litter_y_col    =</span> <span class="st">&quot;16-1_LittersPerYear&quot;</span></span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a>)</span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a></span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a>tetrapodtraits_std <span class="ot">&lt;-</span> <span class="fu">prep_source</span>(</span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a>  mammal_tetrapodtraits_example,</span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a>  <span class="at">source_name     =</span> <span class="st">&quot;TETRAPODTRAITS&quot;</span>,</span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a>  <span class="at">species_col     =</span> <span class="st">&quot;Scientific.Name&quot;</span>,</span>
+<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a>  <span class="at">adult_mass_col  =</span> <span class="st">&quot;BodyMass_g&quot;</span>,</span>
+<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a>  <span class="at">litter_size_col =</span> <span class="st">&quot;LitterSize&quot;</span></span>
+<span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a>)</span>
+<span id="cb4-27"><a href="#cb4-27" tabindex="-1"></a></span>
+<span id="cb4-28"><a href="#cb4-28" tabindex="-1"></a>db_long_raw <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(</span>
+<span id="cb4-29"><a href="#cb4-29" tabindex="-1"></a>  amniote_std,</span>
+<span id="cb4-30"><a href="#cb4-30" tabindex="-1"></a>  pantheria_std,</span>
+<span id="cb4-31"><a href="#cb4-31" tabindex="-1"></a>  tetrapodtraits_std</span>
+<span id="cb4-32"><a href="#cb4-32" tabindex="-1"></a>)</span>
+<span id="cb4-33"><a href="#cb4-33" tabindex="-1"></a></span>
+<span id="cb4-34"><a href="#cb4-34" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="fu">slice_head</span>(db_long_raw, <span class="at">n =</span> <span class="dv">10</span>))</span></code></pre></div>
+<table>
+<colgroup>
+<col width="7%" />
+<col width="12%" />
+<col width="24%" />
+<col width="12%" />
+<col width="11%" />
+<col width="12%" />
+<col width="17%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">source</th>
+<th align="right">row_in_source</th>
+<th align="left">species</th>
+<th align="right">female_mass_g</th>
+<th align="right">adult_mass_g</th>
+<th align="right">litter_size_n</th>
+<th align="right">litters_per_year_n</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">AMNIOTE</td>
+<td align="right">1</td>
+<td align="left">Amblysomus_corriae</td>
+<td align="right">NA</td>
+<td align="right">64.80</td>
+<td align="right">1.93</td>
+<td align="right">2</td>
+</tr>
+<tr class="even">
+<td align="left">AMNIOTE</td>
+<td align="right">2</td>
+<td align="left">Amblysomus_hottentotus</td>
+<td align="right">NA</td>
+<td align="right">64.80</td>
+<td align="right">1.93</td>
+<td align="right">2</td>
+</tr>
+<tr class="odd">
+<td align="left">AMNIOTE</td>
+<td align="right">3</td>
+<td align="left">Amblysomus_marleyi</td>
+<td align="right">NA</td>
+<td align="right">64.80</td>
+<td align="right">1.93</td>
+<td align="right">2</td>
+</tr>
+<tr class="even">
+<td align="left">AMNIOTE</td>
+<td align="right">4</td>
+<td align="left">Amblysomus_robustus</td>
+<td align="right">NA</td>
+<td align="right">64.80</td>
+<td align="right">1.93</td>
+<td align="right">2</td>
+</tr>
+<tr class="odd">
+<td align="left">AMNIOTE</td>
+<td align="right">5</td>
+<td align="left">Amblysomus_septentrionalis</td>
+<td align="right">NA</td>
+<td align="right">64.80</td>
+<td align="right">1.93</td>
+<td align="right">2</td>
+</tr>
+<tr class="even">
+<td align="left">AMNIOTE</td>
+<td align="right">6</td>
+<td align="left">Calcochloris_obtusirostris</td>
+<td align="right">NA</td>
+<td align="right">24.05</td>
+<td align="right">2.00</td>
+<td align="right">NA</td>
+</tr>
+<tr class="odd">
+<td align="left">AMNIOTE</td>
+<td align="right">7</td>
+<td align="left">Carpitalpa_arendsi</td>
+<td align="right">NA</td>
+<td align="right">52.34</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+</tr>
+<tr class="even">
+<td align="left">AMNIOTE</td>
+<td align="right">8</td>
+<td align="left">Chlorotalpa_duthieae</td>
+<td align="right">NA</td>
+<td align="right">31.34</td>
+<td align="right">2.00</td>
+<td align="right">NA</td>
+</tr>
+<tr class="odd">
+<td align="left">AMNIOTE</td>
+<td align="right">9</td>
+<td align="left">Chlorotalpa_sclateri</td>
+<td align="right">NA</td>
+<td align="right">38.30</td>
+<td align="right">2.00</td>
+<td align="right">NA</td>
+</tr>
+<tr class="even">
+<td align="left">AMNIOTE</td>
+<td align="right">10</td>
+<td align="left">Chrysochloris_asiatica</td>
+<td align="right">NA</td>
+<td align="right">36.93</td>
+<td align="right">3.12</td>
+<td align="right">NA</td>
+</tr>
+</tbody>
+</table>
+<p>We can now check how much information each source contributes.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>source_coverage <span class="ot">&lt;-</span> db_long_raw <span class="sc">|&gt;</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>  <span class="fu">group_by</span>(source) <span class="sc">|&gt;</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>    <span class="at">n_records           =</span> <span class="fu">n</span>(),</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>    <span class="at">n_species           =</span> <span class="fu">n_distinct</span>(species),</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>    <span class="at">adult_mass_records  =</span> <span class="fu">sum</span>(<span class="sc">!</span><span class="fu">is.na</span>(adult_mass_g)),</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>    <span class="at">female_mass_records =</span> <span class="fu">sum</span>(<span class="sc">!</span><span class="fu">is.na</span>(female_mass_g)),</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>    <span class="at">litter_size_records =</span> <span class="fu">sum</span>(<span class="sc">!</span><span class="fu">is.na</span>(litter_size_n)),</span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>    <span class="at">litter_y_records    =</span> <span class="fu">sum</span>(<span class="sc">!</span><span class="fu">is.na</span>(litters_per_year_n)),</span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">&quot;drop&quot;</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>  )</span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(source_coverage)</span></code></pre></div>
+<table>
+<colgroup>
+<col width="13%" />
+<col width="9%" />
+<col width="9%" />
+<col width="17%" />
+<col width="18%" />
+<col width="18%" />
+<col width="15%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">source</th>
+<th align="right">n_records</th>
+<th align="right">n_species</th>
+<th align="right">adult_mass_records</th>
+<th align="right">female_mass_records</th>
+<th align="right">litter_size_records</th>
+<th align="right">litter_y_records</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">AMNIOTE</td>
+<td align="right">4953</td>
+<td align="right">4953</td>
+<td align="right">4651</td>
+<td align="right">438</td>
+<td align="right">3511</td>
+<td align="right">2146</td>
+</tr>
+<tr class="even">
+<td align="left">PANTHERIA</td>
+<td align="right">5416</td>
+<td align="right">5416</td>
+<td align="right">3542</td>
+<td align="right">0</td>
+<td align="right">2501</td>
+<td align="right">894</td>
+</tr>
+<tr class="odd">
+<td align="left">TETRAPODTRAITS</td>
+<td align="right">5911</td>
+<td align="right">5911</td>
+<td align="right">5911</td>
+<td align="right">0</td>
+<td align="right">3547</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+<p>In this table <code>n_records</code> is the number of rows the source
+contributes and <code>n_species</code> the number of distinct species;
+each <code>*_records</code> column counts the rows where that trait has
+a non-missing, positive value. Those counts sit well below
+<code>n_records</code> — no single database measures every trait for
+every species, which is exactly why combining sources is worthwhile.</p>
+</div>
+<div id="step-3-reconcile-species-names-with-the-tree" class="section level2">
+<h2>Step 3: Reconcile species names with the tree</h2>
+<p>Name reconciliation is done on the unique source names, not on every
+row of the trait database. This creates one matching decision per raw
+species name.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>species_lookup <span class="ot">&lt;-</span> db_long_raw <span class="sc">|&gt;</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>  <span class="fu">distinct</span>(species) <span class="sc">|&gt;</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">species_raw =</span> species)</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="fu">slice_head</span>(species_lookup, <span class="at">n =</span> <span class="dv">10</span>))</span></code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="left">species_raw</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Amblysomus_corriae</td>
+</tr>
+<tr class="even">
+<td align="left">Amblysomus_hottentotus</td>
+</tr>
+<tr class="odd">
+<td align="left">Amblysomus_marleyi</td>
+</tr>
+<tr class="even">
+<td align="left">Amblysomus_robustus</td>
+</tr>
+<tr class="odd">
+<td align="left">Amblysomus_septentrionalis</td>
+</tr>
+<tr class="even">
+<td align="left">Calcochloris_obtusirostris</td>
+</tr>
+<tr class="odd">
+<td align="left">Carpitalpa_arendsi</td>
+</tr>
+<tr class="even">
+<td align="left">Chlorotalpa_duthieae</td>
+</tr>
+<tr class="odd">
+<td align="left">Chlorotalpa_sclateri</td>
+</tr>
+<tr class="even">
+<td align="left">Chrysochloris_asiatica</td>
+</tr>
+</tbody>
+</table>
+<p>We now reconcile the source names against the tree. External synonym
+lookup is turned off here so the vignette remains fast and
+reproducible.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>rec0 <span class="ot">&lt;-</span> <span class="fu">reconcile_tree</span>(</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>  <span class="at">x         =</span> species_lookup,</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>  <span class="at">tree      =</span> mammal_tree_example,</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>  <span class="at">x_species =</span> <span class="st">&quot;species_raw&quot;</span>,</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>  <span class="at">authority =</span> <span class="cn">NULL</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>  <span class="at">fuzzy     =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>  <span class="at">quiet     =</span> <span class="cn">TRUE</span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>)</span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="fu">reconcile_summary</span>(rec0, <span class="at">detail =</span> <span class="st">&quot;brief&quot;</span>)</span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="co">#&gt; === Reconciliation Report ===</span></span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="co">#&gt; Type: data_tree</span></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="co">#&gt; Timestamp: 2026-08-07 16:17:19</span></span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="co">#&gt; Package: prepR4pcm 1.0.2</span></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a><span class="co">#&gt; Authority: NONE (version: latest)</span></span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a><span class="co">#&gt; Rank: species</span></span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a><span class="co">#&gt; --- Match Summary ---</span></span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a><span class="co">#&gt;   Exact:       4677 / 11304</span></span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a><span class="co">#&gt;   Normalized:  1234 / 11304</span></span>
+<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a><span class="co">#&gt;   Synonym:     0 / 11304</span></span>
+<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a><span class="co">#&gt;   Fuzzy:       0 / 11304</span></span>
+<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a><span class="co">#&gt;   Manual:      0 / 11304</span></span>
+<span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a><span class="co">#&gt;   Unresolved:  5393 (x only) + 76 (y only)</span></span>
+<span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a><span class="co">#&gt; </span></span></code></pre></div>
+<p>The mapping table records which source names matched the tree and
+which need review. In it, <code>name_x</code> is the raw source name,
+<code>name_y</code> the tree tip it resolved to, <code>match_type</code>
+records how the two were linked, and <code>in_x</code> /
+<code>in_y</code> flag whether the name is present in the data and in
+the tree.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>mapping0 <span class="ot">&lt;-</span> <span class="fu">reconcile_mapping</span>(rec0)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>mapping_preview <span class="ot">&lt;-</span> mapping0 <span class="sc">|&gt;</span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">any_of</span>(<span class="fu">c</span>(<span class="st">&quot;name_x&quot;</span>, <span class="st">&quot;name_y&quot;</span>, <span class="st">&quot;match_type&quot;</span>, <span class="st">&quot;in_x&quot;</span>, <span class="st">&quot;in_y&quot;</span>))) <span class="sc">|&gt;</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>  <span class="fu">arrange</span>(match_type, name_x) <span class="sc">|&gt;</span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>  <span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">15</span>)</span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(mapping_preview)</span></code></pre></div>
+<table>
+<colgroup>
+<col width="34%" />
+<col width="34%" />
+<col width="16%" />
+<col width="7%" />
+<col width="7%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">name_x</th>
+<th align="left">name_y</th>
+<th align="left">match_type</th>
+<th align="left">in_x</th>
+<th align="left">in_y</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Abditomys_latidens</td>
+<td align="left">Abditomys_latidens</td>
+<td align="left">exact</td>
+<td align="left">TRUE</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="even">
+<td align="left">Abeomelomys_sevia</td>
+<td align="left">Abeomelomys_sevia</td>
+<td align="left">exact</td>
+<td align="left">TRUE</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="odd">
+<td align="left">Abrawayaomys_ruschii</td>
+<td align="left">Abrawayaomys_ruschii</td>
+<td align="left">exact</td>
+<td align="left">TRUE</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="even">
+<td align="left">Abrocoma_bennettii</td>
+<td align="left">Abrocoma_bennettii</td>
+<td align="left">exact</td>
+<td align="left">TRUE</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="odd">
+<td align="left">Abrocoma_boliviensis</td>
+<td align="left">Abrocoma_boliviensis</td>
+<td align="left">exact</td>
+<td align="left">TRUE</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="even">
+<td align="left">Abrocoma_budini</td>
+<td align="left">Abrocoma_budini</td>
+<td align="left">exact</td>
+<td align="left">TRUE</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="odd">
+<td align="left">Abrocoma_cinerea</td>
+<td align="left">Abrocoma_cinerea</td>
+<td align="left">exact</td>
+<td align="left">TRUE</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="even">
+<td align="left">Abrocoma_famatina</td>
+<td align="left">Abrocoma_famatina</td>
+<td align="left">exact</td>
+<td align="left">TRUE</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="odd">
+<td align="left">Abrocoma_shistacea</td>
+<td align="left">Abrocoma_shistacea</td>
+<td align="left">exact</td>
+<td align="left">TRUE</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="even">
+<td align="left">Abrocoma_vaccarum</td>
+<td align="left">Abrocoma_vaccarum</td>
+<td align="left">exact</td>
+<td align="left">TRUE</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="odd">
+<td align="left">Abrothrix_andinus</td>
+<td align="left">Abrothrix_andinus</td>
+<td align="left">exact</td>
+<td align="left">TRUE</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="even">
+<td align="left">Abrothrix_hershkovitzi</td>
+<td align="left">Abrothrix_hershkovitzi</td>
+<td align="left">exact</td>
+<td align="left">TRUE</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="odd">
+<td align="left">Abrothrix_illuteus</td>
+<td align="left">Abrothrix_illuteus</td>
+<td align="left">exact</td>
+<td align="left">TRUE</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="even">
+<td align="left">Abrothrix_jelskii</td>
+<td align="left">Abrothrix_jelskii</td>
+<td align="left">exact</td>
+<td align="left">TRUE</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="odd">
+<td align="left">Abrothrix_lanosus</td>
+<td align="left">Abrothrix_lanosus</td>
+<td align="left">exact</td>
+<td align="left">TRUE</td>
+<td align="left">TRUE</td>
+</tr>
+</tbody>
+</table>
+<p>Names that remain unresolved or flagged can be inspected separately.
+We also ask for suggested matches. These suggestions are not applied
+automatically; they are candidates for manual review.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>review_names <span class="ot">&lt;-</span> mapping0 <span class="sc">|&gt;</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>  <span class="fu">filter</span>(in_x, match_type <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;unresolved&quot;</span>, <span class="st">&quot;flagged&quot;</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>  <span class="fu">arrange</span>(match_type, name_x)</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">nrow</span>(review_names) <span class="sc">==</span> <span class="dv">0</span>) {</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;No unresolved or flagged names in this example.</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">sprintf</span>(</span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a>    <span class="st">&quot;Showing 10 of %d unresolved or flagged names.</span><span class="sc">\n\n</span><span class="st">&quot;</span>,</span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a>    <span class="fu">nrow</span>(review_names)</span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a>  ))</span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="fu">slice_head</span>(review_names, <span class="at">n =</span> <span class="dv">10</span>) <span class="sc">|&gt;</span></span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a>                 <span class="fu">select</span>(<span class="fu">any_of</span>(<span class="fu">c</span>(<span class="st">&quot;name_x&quot;</span>, <span class="st">&quot;name_y&quot;</span>, <span class="st">&quot;match_type&quot;</span>,</span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a>                                 <span class="st">&quot;in_x&quot;</span>, <span class="st">&quot;in_y&quot;</span>))))</span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a>}</span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a><span class="co">#&gt; Showing 10 of 5393 unresolved or flagged names.</span></span></code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="left">name_x</th>
+<th align="left">name_y</th>
+<th align="left">match_type</th>
+<th align="left">in_x</th>
+<th align="left">in_y</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Abditomys latidens</td>
+<td align="left">NA</td>
+<td align="left">unresolved</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">Abeomelomys sevia</td>
+<td align="left">NA</td>
+<td align="left">unresolved</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">Abrawayaomys ruschii</td>
+<td align="left">NA</td>
+<td align="left">unresolved</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">Abrocoma bennettii</td>
+<td align="left">NA</td>
+<td align="left">unresolved</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">Abrocoma boliviensis</td>
+<td align="left">NA</td>
+<td align="left">unresolved</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">Abrocoma budini</td>
+<td align="left">NA</td>
+<td align="left">unresolved</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">Abrocoma cinerea</td>
+<td align="left">NA</td>
+<td align="left">unresolved</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">Abrocoma famatina</td>
+<td align="left">NA</td>
+<td align="left">unresolved</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">Abrocoma shistacea</td>
+<td align="left">NA</td>
+<td align="left">unresolved</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">Abrocoma vaccarum</td>
+<td align="left">NA</td>
+<td align="left">unresolved</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>suggestions0 <span class="ot">&lt;-</span> <span class="fu">reconcile_suggest</span>(rec0, <span class="at">n =</span> <span class="dv">3</span>, <span class="at">threshold =</span> <span class="fl">0.9</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="co">#&gt; ✔ Found suggestions for 4683 of 5393 unresolved species.</span></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>suggestions_to_review <span class="ot">&lt;-</span> suggestions0 <span class="sc">|&gt;</span></span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>  <span class="fu">transmute</span>(</span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>    <span class="at">name_x =</span> unresolved,</span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a>    <span class="at">name_y =</span> suggestion,</span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a>    <span class="at">score  =</span> score</span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a>  <span class="fu">filter</span>(score <span class="sc">&gt;=</span> <span class="fl">0.9</span>, score <span class="sc">&lt;</span> <span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(score))</span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a></span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">nrow</span>(suggestions_to_review) <span class="sc">==</span> <span class="dv">0</span>) {</span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;No high-confidence, non-perfect suggestions were found.</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a>  <span class="fu">cat</span>(</span>
+<span id="cb10-18"><a href="#cb10-18" tabindex="-1"></a>    <span class="st">&quot;Showing up to 10 high-confidence suggested matches with score below 1.</span><span class="sc">\n\n</span><span class="st">&quot;</span>,</span>
+<span id="cb10-19"><a href="#cb10-19" tabindex="-1"></a>    <span class="at">sep =</span> <span class="st">&quot;&quot;</span></span>
+<span id="cb10-20"><a href="#cb10-20" tabindex="-1"></a>  )</span>
+<span id="cb10-21"><a href="#cb10-21" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="fu">slice_head</span>(suggestions_to_review, <span class="at">n =</span> <span class="dv">10</span>), <span class="at">digits =</span> <span class="dv">3</span>)</span>
+<span id="cb10-22"><a href="#cb10-22" tabindex="-1"></a>}</span>
+<span id="cb10-23"><a href="#cb10-23" tabindex="-1"></a><span class="co">#&gt; Showing up to 10 high-confidence suggested matches with score below 1.</span></span></code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="left">name_x</th>
+<th align="left">name_y</th>
+<th align="right">score</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Tamiops mcclellandii</td>
+<td align="left">Tamiops_macclellandii</td>
+<td align="right">0.969</td>
+</tr>
+<tr class="even">
+<td align="left">Tamiops_mcclellandii</td>
+<td align="left">Tamiops_macclellandii</td>
+<td align="right">0.969</td>
+</tr>
+<tr class="odd">
+<td align="left">Rattus arfakiensis</td>
+<td align="left">Rattus_arfakienis</td>
+<td align="right">0.964</td>
+</tr>
+<tr class="even">
+<td align="left">Rattus_arfakiensis</td>
+<td align="left">Rattus_arfakienis</td>
+<td align="right">0.964</td>
+</tr>
+<tr class="odd">
+<td align="left">Galeopterus variegates</td>
+<td align="left">Galeopterus_variegatus</td>
+<td align="right">0.960</td>
+</tr>
+<tr class="even">
+<td align="left">Galeopterus_variegates</td>
+<td align="left">Galeopterus_variegatus</td>
+<td align="right">0.960</td>
+</tr>
+<tr class="odd">
+<td align="left">Herpestes edwardsi</td>
+<td align="left">Herpestes_edwardsii</td>
+<td align="right">0.956</td>
+</tr>
+<tr class="even">
+<td align="left">Herpestes_edwardsi</td>
+<td align="left">Herpestes_edwardsii</td>
+<td align="right">0.956</td>
+</tr>
+<tr class="odd">
+<td align="left">Neophascogale lorentzi</td>
+<td align="left">Neophascogale_lorentzii</td>
+<td align="right">0.956</td>
+</tr>
+<tr class="even">
+<td align="left">Neophascogale_lorentzi</td>
+<td align="left">Neophascogale_lorentzii</td>
+<td align="right">0.956</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="step-4-add-manual-corrections" class="section level2">
+<h2>Step 4: Add manual corrections</h2>
+<p>Automated reconciliation is useful, but some names still need human
+review. The suggestion table above helps identify likely matches. Manual
+corrections are stored as a small editable table.</p>
+<p>The important rule is simple: <code>name_x</code> must be a name from
+the trait database, and <code>name_y</code> must be an exact tip label
+in the tree.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>manual_overrides <span class="ot">&lt;-</span> suggestions_to_review <span class="sc">|&gt;</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>  <span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">2</span>) <span class="sc">|&gt;</span></span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">user_note =</span> <span class="st">&quot;Accepted from high-confidence reconciliation suggestion&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>  <span class="fu">select</span>(name_x, name_y, user_note)</span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">nrow</span>(manual_overrides) <span class="sc">==</span> <span class="dv">0</span>) {</span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;No manual corrections were added in this example.</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>(manual_overrides, <span class="at">digits =</span> <span class="dv">3</span>)</span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a>}</span></code></pre></div>
+<table>
+<colgroup>
+<col width="21%" />
+<col width="22%" />
+<col width="56%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">name_x</th>
+<th align="left">name_y</th>
+<th align="left">user_note</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Tamiops mcclellandii</td>
+<td align="left">Tamiops_macclellandii</td>
+<td align="left">Accepted from high-confidence reconciliation
+suggestion</td>
+</tr>
+<tr class="even">
+<td align="left">Tamiops_mcclellandii</td>
+<td align="left">Tamiops_macclellandii</td>
+<td align="left">Accepted from high-confidence reconciliation
+suggestion</td>
+</tr>
+</tbody>
+</table>
+<p>We then apply any manual corrections to the reconciliation table. If
+<code>manual_overrides</code> is empty, the automated mapping is kept
+unchanged.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>mapping_final <span class="ot">&lt;-</span> mapping0 <span class="sc">|&gt;</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>  <span class="fu">left_join</span>(</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>    manual_overrides <span class="sc">|&gt;</span></span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>      <span class="fu">rename</span>(<span class="at">manual_name_y =</span> name_y, <span class="at">manual_note =</span> user_note),</span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>    <span class="at">by =</span> <span class="st">&quot;name_x&quot;</span></span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a>    <span class="at">species_tree    =</span> <span class="fu">coalesce</span>(manual_name_y, name_y),</span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a>    <span class="at">matched_to_tree =</span> species_tree <span class="sc">%in%</span> mammal_tree_example<span class="sc">$</span>tip.label,</span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a>    <span class="at">match_type      =</span> <span class="fu">if_else</span>(<span class="sc">!</span><span class="fu">is.na</span>(manual_name_y), <span class="st">&quot;manual&quot;</span>, match_type),</span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a>    <span class="at">notes           =</span> manual_note</span>
+<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>manual_name_y, <span class="sc">-</span>manual_note)</span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>final_reconciliation_summary <span class="ot">&lt;-</span> mapping_final <span class="sc">|&gt;</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>  <span class="fu">filter</span>(in_x) <span class="sc">|&gt;</span></span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>  <span class="fu">count</span>(match_type, <span class="at">name =</span> <span class="st">&quot;n_names&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(n_names), match_type)</span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a></span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(final_reconciliation_summary)</span></code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="left">match_type</th>
+<th align="right">n_names</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">unresolved</td>
+<td align="right">5391</td>
+</tr>
+<tr class="even">
+<td align="left">exact</td>
+<td align="right">4677</td>
+</tr>
+<tr class="odd">
+<td align="left">normalized</td>
+<td align="right">1234</td>
+</tr>
+<tr class="even">
+<td align="left">manual</td>
+<td align="right">2</td>
+</tr>
+</tbody>
+</table>
+<p>The corrected mapping can now be joined back to the full source-level
+trait table.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>name_map <span class="ot">&lt;-</span> mapping_final <span class="sc">|&gt;</span></span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>  <span class="fu">filter</span>(in_x) <span class="sc">|&gt;</span></span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>  <span class="fu">transmute</span>(</span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>    <span class="at">species_raw     =</span> name_x,</span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a>    <span class="at">species_tree    =</span> species_tree,</span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a>    <span class="at">matched_to_tree =</span> matched_to_tree,</span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a>    <span class="at">match_type      =</span> match_type,</span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a>    <span class="at">notes           =</span> notes</span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a>  )</span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a></span>
+<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a>db_full <span class="ot">&lt;-</span> db_long_raw <span class="sc">|&gt;</span></span>
+<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">species_raw =</span> species) <span class="sc">|&gt;</span></span>
+<span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a>  <span class="fu">left_join</span>(name_map, <span class="at">by =</span> <span class="st">&quot;species_raw&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb14-14"><a href="#cb14-14" tabindex="-1"></a>  <span class="fu">relocate</span>(source, row_in_source, species_raw, species_tree,</span>
+<span id="cb14-15"><a href="#cb14-15" tabindex="-1"></a>           matched_to_tree, match_type)</span>
+<span id="cb14-16"><a href="#cb14-16" tabindex="-1"></a></span>
+<span id="cb14-17"><a href="#cb14-17" tabindex="-1"></a>db_tree_matched <span class="ot">&lt;-</span> db_full <span class="sc">|&gt;</span></span>
+<span id="cb14-18"><a href="#cb14-18" tabindex="-1"></a>  <span class="fu">filter</span>(matched_to_tree, <span class="sc">!</span><span class="fu">is.na</span>(species_tree))</span>
+<span id="cb14-19"><a href="#cb14-19" tabindex="-1"></a></span>
+<span id="cb14-20"><a href="#cb14-20" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb14-21"><a href="#cb14-21" tabindex="-1"></a>  db_tree_matched <span class="sc">|&gt;</span></span>
+<span id="cb14-22"><a href="#cb14-22" tabindex="-1"></a>    <span class="fu">select</span>(source, species_raw, species_tree, match_type,</span>
+<span id="cb14-23"><a href="#cb14-23" tabindex="-1"></a>           adult_mass_g, female_mass_g, litter_size_n,</span>
+<span id="cb14-24"><a href="#cb14-24" tabindex="-1"></a>           litters_per_year_n) <span class="sc">|&gt;</span></span>
+<span id="cb14-25"><a href="#cb14-25" tabindex="-1"></a>    <span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">10</span>),</span>
+<span id="cb14-26"><a href="#cb14-26" tabindex="-1"></a>  <span class="at">digits =</span> <span class="dv">3</span></span>
+<span id="cb14-27"><a href="#cb14-27" tabindex="-1"></a>)</span></code></pre></div>
+<table>
+<colgroup>
+<col width="6%" />
+<col width="20%" />
+<col width="20%" />
+<col width="8%" />
+<col width="9%" />
+<col width="10%" />
+<col width="10%" />
+<col width="14%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">source</th>
+<th align="left">species_raw</th>
+<th align="left">species_tree</th>
+<th align="left">match_type</th>
+<th align="right">adult_mass_g</th>
+<th align="right">female_mass_g</th>
+<th align="right">litter_size_n</th>
+<th align="right">litters_per_year_n</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">AMNIOTE</td>
+<td align="left">Amblysomus_corriae</td>
+<td align="left">Amblysomus_corriae</td>
+<td align="left">exact</td>
+<td align="right">64.80</td>
+<td align="right">NA</td>
+<td align="right">1.93</td>
+<td align="right">2</td>
+</tr>
+<tr class="even">
+<td align="left">AMNIOTE</td>
+<td align="left">Amblysomus_hottentotus</td>
+<td align="left">Amblysomus_hottentotus</td>
+<td align="left">exact</td>
+<td align="right">64.80</td>
+<td align="right">NA</td>
+<td align="right">1.93</td>
+<td align="right">2</td>
+</tr>
+<tr class="odd">
+<td align="left">AMNIOTE</td>
+<td align="left">Amblysomus_marleyi</td>
+<td align="left">Amblysomus_marleyi</td>
+<td align="left">exact</td>
+<td align="right">64.80</td>
+<td align="right">NA</td>
+<td align="right">1.93</td>
+<td align="right">2</td>
+</tr>
+<tr class="even">
+<td align="left">AMNIOTE</td>
+<td align="left">Amblysomus_robustus</td>
+<td align="left">Amblysomus_robustus</td>
+<td align="left">exact</td>
+<td align="right">64.80</td>
+<td align="right">NA</td>
+<td align="right">1.93</td>
+<td align="right">2</td>
+</tr>
+<tr class="odd">
+<td align="left">AMNIOTE</td>
+<td align="left">Amblysomus_septentrionalis</td>
+<td align="left">Amblysomus_septentrionalis</td>
+<td align="left">exact</td>
+<td align="right">64.80</td>
+<td align="right">NA</td>
+<td align="right">1.93</td>
+<td align="right">2</td>
+</tr>
+<tr class="even">
+<td align="left">AMNIOTE</td>
+<td align="left">Calcochloris_obtusirostris</td>
+<td align="left">Calcochloris_obtusirostris</td>
+<td align="left">exact</td>
+<td align="right">24.05</td>
+<td align="right">NA</td>
+<td align="right">2.00</td>
+<td align="right">NA</td>
+</tr>
+<tr class="odd">
+<td align="left">AMNIOTE</td>
+<td align="left">Carpitalpa_arendsi</td>
+<td align="left">Carpitalpa_arendsi</td>
+<td align="left">exact</td>
+<td align="right">52.34</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+</tr>
+<tr class="even">
+<td align="left">AMNIOTE</td>
+<td align="left">Chlorotalpa_duthieae</td>
+<td align="left">Chlorotalpa_duthieae</td>
+<td align="left">exact</td>
+<td align="right">31.34</td>
+<td align="right">NA</td>
+<td align="right">2.00</td>
+<td align="right">NA</td>
+</tr>
+<tr class="odd">
+<td align="left">AMNIOTE</td>
+<td align="left">Chlorotalpa_sclateri</td>
+<td align="left">Chlorotalpa_sclateri</td>
+<td align="left">exact</td>
+<td align="right">38.30</td>
+<td align="right">NA</td>
+<td align="right">2.00</td>
+<td align="right">NA</td>
+</tr>
+<tr class="even">
+<td align="left">AMNIOTE</td>
+<td align="left">Chrysochloris_asiatica</td>
+<td align="left">Chrysochloris_asiatica</td>
+<td align="left">exact</td>
+<td align="right">36.93</td>
+<td align="right">NA</td>
+<td align="right">3.12</td>
+<td align="right">NA</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="step-5-collapse-to-one-row-per-species" class="section level2">
+<h2>Step 5: Collapse to one row per species</h2>
+<p>The source-level database can now be summarised to one record per
+matched species. Here we use the median trait value across available
+source records and keep simple provenance columns.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>db_species_summary <span class="ot">&lt;-</span> db_tree_matched <span class="sc">|&gt;</span></span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a>  <span class="fu">group_by</span>(species_tree) <span class="sc">|&gt;</span></span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a>    <span class="at">n_sources_total       =</span> <span class="fu">n_distinct</span>(source),</span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>    <span class="at">sources               =</span> <span class="fu">safe_sources</span>(source),</span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>    <span class="at">adult_mass_g          =</span> <span class="fu">safe_median</span>(adult_mass_g),</span>
+<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a>    <span class="at">female_mass_g         =</span> <span class="fu">safe_median</span>(female_mass_g),</span>
+<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a>    <span class="at">litter_size_n         =</span> <span class="fu">safe_median</span>(litter_size_n),</span>
+<span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a>    <span class="at">litters_per_year_n    =</span> <span class="fu">safe_median</span>(litters_per_year_n),</span>
+<span id="cb15-10"><a href="#cb15-10" tabindex="-1"></a>    <span class="at">adult_mass_n_records  =</span> <span class="fu">sum</span>(<span class="sc">!</span><span class="fu">is.na</span>(adult_mass_g)),</span>
+<span id="cb15-11"><a href="#cb15-11" tabindex="-1"></a>    <span class="at">female_mass_n_records =</span> <span class="fu">sum</span>(<span class="sc">!</span><span class="fu">is.na</span>(female_mass_g)),</span>
+<span id="cb15-12"><a href="#cb15-12" tabindex="-1"></a>    <span class="at">litter_size_n_records =</span> <span class="fu">sum</span>(<span class="sc">!</span><span class="fu">is.na</span>(litter_size_n)),</span>
+<span id="cb15-13"><a href="#cb15-13" tabindex="-1"></a>    <span class="at">litter_y_n_records    =</span> <span class="fu">sum</span>(<span class="sc">!</span><span class="fu">is.na</span>(litters_per_year_n)),</span>
+<span id="cb15-14"><a href="#cb15-14" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">&quot;drop&quot;</span></span>
+<span id="cb15-15"><a href="#cb15-15" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb15-16"><a href="#cb15-16" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">annual_offspring_n =</span> litter_size_n <span class="sc">*</span> litters_per_year_n)</span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>trait_coverage <span class="ot">&lt;-</span> db_species_summary <span class="sc">|&gt;</span></span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a>    <span class="at">n_species               =</span> <span class="fu">n</span>(),</span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a>    <span class="at">adult_mass_species      =</span> <span class="fu">sum</span>(<span class="sc">!</span><span class="fu">is.na</span>(adult_mass_g)),</span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a>    <span class="at">female_mass_species     =</span> <span class="fu">sum</span>(<span class="sc">!</span><span class="fu">is.na</span>(female_mass_g)),</span>
+<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a>    <span class="at">litter_size_species     =</span> <span class="fu">sum</span>(<span class="sc">!</span><span class="fu">is.na</span>(litter_size_n)),</span>
+<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a>    <span class="at">litters_per_year_species=</span> <span class="fu">sum</span>(<span class="sc">!</span><span class="fu">is.na</span>(litters_per_year_n)),</span>
+<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a>    <span class="at">annual_offspring_species=</span> <span class="fu">sum</span>(<span class="sc">!</span><span class="fu">is.na</span>(annual_offspring_n))</span>
+<span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a>  )</span>
+<span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a></span>
+<span id="cb16-11"><a href="#cb16-11" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(trait_coverage)</span></code></pre></div>
+<table>
+<colgroup>
+<col width="8%" />
+<col width="15%" />
+<col width="16%" />
+<col width="16%" />
+<col width="21%" />
+<col width="21%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="right">n_species</th>
+<th align="right">adult_mass_species</th>
+<th align="right">female_mass_species</th>
+<th align="right">litter_size_species</th>
+<th align="right">litters_per_year_species</th>
+<th align="right">annual_offspring_species</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">5911</td>
+<td align="right">5634</td>
+<td align="right">395</td>
+<td align="right">3446</td>
+<td align="right">2000</td>
+<td align="right">1975</td>
+</tr>
+</tbody>
+</table>
+<p>Each <code>*_species</code> column counts the species with a
+non-missing value for that trait. Some species still carry
+<code>NA</code>: even with three sources combined, not every species has
+every trait measured. Downstream comparative models handle these gaps
+through imputation or complete-case analysis.</p>
+</div>
+<div id="step-6-align-the-database-and-the-tree" class="section level2">
+<h2>Step 6: Align the database and the tree</h2>
+<p>For phylogenetic comparative models, the data and tree must refer to
+the same species. Here we prune the tree and order the data rows to
+match the tree tips.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a>matched_tips <span class="ot">&lt;-</span> <span class="fu">intersect</span>(</span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a>  mammal_tree_example<span class="sc">$</span>tip.label,</span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a>  db_species_summary<span class="sc">$</span>species_tree</span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a>)</span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a></span>
+<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a>tree_pcm <span class="ot">&lt;-</span> <span class="fu">keep.tip</span>(mammal_tree_example, matched_tips)</span>
+<span id="cb17-7"><a href="#cb17-7" tabindex="-1"></a></span>
+<span id="cb17-8"><a href="#cb17-8" tabindex="-1"></a>pcm_data <span class="ot">&lt;-</span> db_species_summary <span class="sc">|&gt;</span></span>
+<span id="cb17-9"><a href="#cb17-9" tabindex="-1"></a>  <span class="fu">filter</span>(species_tree <span class="sc">%in%</span> tree_pcm<span class="sc">$</span>tip.label) <span class="sc">|&gt;</span></span>
+<span id="cb17-10"><a href="#cb17-10" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">species =</span> species_tree) <span class="sc">|&gt;</span></span>
+<span id="cb17-11"><a href="#cb17-11" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">match</span>(species, tree_pcm<span class="sc">$</span>tip.label)) <span class="sc">|&gt;</span></span>
+<span id="cb17-12"><a href="#cb17-12" tabindex="-1"></a>  <span class="fu">relocate</span>(species)</span>
+<span id="cb17-13"><a href="#cb17-13" tabindex="-1"></a></span>
+<span id="cb17-14"><a href="#cb17-14" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">identical</span>(pcm_data<span class="sc">$</span>species, tree_pcm<span class="sc">$</span>tip.label))</span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a>alignment_check <span class="ot">&lt;-</span> tibble<span class="sc">::</span><span class="fu">tibble</span>(</span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a>  <span class="at">object          =</span> <span class="fu">c</span>(<span class="st">&quot;pcm_data&quot;</span>, <span class="st">&quot;tree_pcm&quot;</span>),</span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a>  <span class="at">species_or_tips =</span> <span class="fu">c</span>(<span class="fu">nrow</span>(pcm_data), ape<span class="sc">::</span><span class="fu">Ntip</span>(tree_pcm)),</span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a>  <span class="at">aligned         =</span> <span class="fu">c</span>(</span>
+<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a>    <span class="fu">identical</span>(pcm_data<span class="sc">$</span>species, tree_pcm<span class="sc">$</span>tip.label),</span>
+<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a>    <span class="fu">identical</span>(pcm_data<span class="sc">$</span>species, tree_pcm<span class="sc">$</span>tip.label)</span>
+<span id="cb18-7"><a href="#cb18-7" tabindex="-1"></a>  )</span>
+<span id="cb18-8"><a href="#cb18-8" tabindex="-1"></a>)</span>
+<span id="cb18-9"><a href="#cb18-9" tabindex="-1"></a></span>
+<span id="cb18-10"><a href="#cb18-10" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(alignment_check)</span></code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="left">object</th>
+<th align="right">species_or_tips</th>
+<th align="left">aligned</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">pcm_data</td>
+<td align="right">5911</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="even">
+<td align="left">tree_pcm</td>
+<td align="right">5911</td>
+<td align="left">TRUE</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="final-database-ready-for-model-fitting" class="section level2">
+<h2>Final database ready for model fitting</h2>
+<p>The final objects are <code>pcm_data</code> and
+<code>tree_pcm</code>. The table below shows the first 10 rows of the
+assembled database. This is the object that would be passed to
+downstream phylogenetic comparative models.</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a>  pcm_data <span class="sc">|&gt;</span></span>
+<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a>    <span class="fu">select</span>(species, adult_mass_g, litter_size_n,</span>
+<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a>           litters_per_year_n, annual_offspring_n,</span>
+<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a>           n_sources_total, sources) <span class="sc">|&gt;</span></span>
+<span id="cb19-6"><a href="#cb19-6" tabindex="-1"></a>    <span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">10</span>),</span>
+<span id="cb19-7"><a href="#cb19-7" tabindex="-1"></a>  <span class="at">digits =</span> <span class="dv">3</span></span>
+<span id="cb19-8"><a href="#cb19-8" tabindex="-1"></a>)</span></code></pre></div>
+<table>
+<colgroup>
+<col width="19%" />
+<col width="10%" />
+<col width="10%" />
+<col width="14%" />
+<col width="14%" />
+<col width="12%" />
+<col width="18%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">species</th>
+<th align="right">adult_mass_g</th>
+<th align="right">litter_size_n</th>
+<th align="right">litters_per_year_n</th>
+<th align="right">annual_offspring_n</th>
+<th align="right">n_sources_total</th>
+<th align="left">sources</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Zaglossus_bartoni</td>
+<td align="right">8951.71</td>
+<td align="right">1</td>
+<td align="right">1.00</td>
+<td align="right">1.00</td>
+<td align="right">1</td>
+<td align="left">AMNIOTE</td>
+</tr>
+<tr class="even">
+<td align="left">Zaglossus_bruijnii</td>
+<td align="right">16500.00</td>
+<td align="right">1</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">1</td>
+<td align="left">TETRAPODTRAITS</td>
+</tr>
+<tr class="odd">
+<td align="left">Zaglossus_attenboroughi</td>
+<td align="right">3000.00</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">1</td>
+<td align="left">AMNIOTE</td>
+</tr>
+<tr class="even">
+<td align="left">Tachyglossus_aculeatus</td>
+<td align="right">3169.50</td>
+<td align="right">1</td>
+<td align="right">0.58</td>
+<td align="right">0.58</td>
+<td align="right">1</td>
+<td align="left">AMNIOTE</td>
+</tr>
+<tr class="odd">
+<td align="left">Ornithorhynchus_anatinus</td>
+<td align="right">1225.00</td>
+<td align="right">2</td>
+<td align="right">1.10</td>
+<td align="right">2.20</td>
+<td align="right">1</td>
+<td align="left">AMNIOTE</td>
+</tr>
+<tr class="even">
+<td align="left">Hydrodamalis_gigas</td>
+<td align="right">8950000.00</td>
+<td align="right">1</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">2</td>
+<td align="left">AMNIOTE; TETRAPODTRAITS</td>
+</tr>
+<tr class="odd">
+<td align="left">Trichechus_manatus</td>
+<td align="right">387500.00</td>
+<td align="right">1</td>
+<td align="right">0.40</td>
+<td align="right">0.40</td>
+<td align="right">1</td>
+<td align="left">AMNIOTE</td>
+</tr>
+<tr class="even">
+<td align="left">Trichechus_senegalensis</td>
+<td align="right">477000.00</td>
+<td align="right">1</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">1</td>
+<td align="left">AMNIOTE</td>
+</tr>
+<tr class="odd">
+<td align="left">Trichechus_inunguis</td>
+<td align="right">294000.59</td>
+<td align="right">1</td>
+<td align="right">0.50</td>
+<td align="right">0.50</td>
+<td align="right">1</td>
+<td align="left">AMNIOTE</td>
+</tr>
+<tr class="even">
+<td align="left">Dugong_dugon</td>
+<td align="right">360000.00</td>
+<td align="right">1</td>
+<td align="right">0.22</td>
+<td align="right">0.22</td>
+<td align="right">1</td>
+<td align="left">AMNIOTE</td>
+</tr>
+</tbody>
+</table>
+<p>The helper functions used in this vignette
+(<code>prep_source()</code>, <code>pull_number_or_na()</code>,
+<code>safe_sources()</code>, <code>safe_median()</code>) are local to
+this document; they are deliberately minimal so you can copy and adapt
+them for your own assembly script. If a generic version proves useful in
+practice we can graduate them to exported package functions.</p>
+</div>
+<div id="references" class="section level2 unnumbered">
+<h2 class="unnumbered">References</h2>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-Jones2009" class="csl-entry">
+Jones, Kate E., Jon Bielby, Marcel Cardillo, et al. 2009.
+<span>“PanTHERIA: A Species‐level Database of Life History, Ecology, and
+Geography of Extant and Recently Extinct Mammals.”</span>
+<em>Ecology</em> 90 (September): 2648–48. <a href="https://doi.org/10.1890/08-1494.1">https://doi.org/10.1890/08-1494.1</a>.
+</div>
+<div id="ref-Moura2024" class="csl-entry">
+Moura, Mario R., Karoline Ceron, Jhonny J. M. Guedes, et al. 2024.
+<span>“A Phylogeny-Informed Characterisation of Global Tetrapod Traits
+Addresses Data Gaps and Biases.”</span> <em>PLOS Biology</em> 22 (July):
+e3002658. <a href="https://doi.org/10.1371/journal.pbio.3002658">https://doi.org/10.1371/journal.pbio.3002658</a>.
+</div>
+<div id="ref-Myhrvold2015" class="csl-entry">
+Myhrvold, Nathan P., Elita Baldridge, Benjamin Chan, Dhileep Sivam,
+Daniel L. Freeman, and S. K. Morgan Ernest. 2015. <span>“An Amniote
+Life-History Database to Perform Comparative Analyses with Birds,
+Mammals, and Reptiles.”</span> <em>Ecology</em> 96 (November): 3109–9.
+<a href="https://doi.org/10.1890/15-0846R.1">https://doi.org/10.1890/15-0846R.1</a>.
+</div>
+<div id="ref-Upham2019" class="csl-entry">
+Upham, Nathan S., Jacob A. Esselstyn, and Walter Jetz. 2019.
+<span>“Inferring the Mammal Tree: Species-Level Sets of Phylogenies for
+Questions in Ecology, Evolution, and Conservation.”</span> <em>PLOS
+Biology</em> 17: e3000494. <a href="https://doi.org/10.1371/journal.pbio.3000494">https://doi.org/10.1371/journal.pbio.3000494</a>.
+</div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

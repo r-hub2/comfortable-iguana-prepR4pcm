@@ -1,0 +1,26 @@
+citHeader(c(
+  "To cite prepR4pcm itself, use the entry below.",
+  "If you use a bundled example dataset (avonet_subset, nesttrait_subset,",
+  "delhey_subset, tree_jetz, tree_clements25, crosswalk_birdlife_birdtree,",
+  "mammal_amniote_example, mammal_pantheria_example,",
+  "mammal_tetrapodtraits_example), please ALSO cite the original",
+  "publication listed in the dataset's help page (`?<dataset>`)."
+))
+
+bibentry(
+  bibtype  = "Manual",
+  title    = "prepR4pcm: Prepare Data and Trees for Phylogenetic Comparative Methods",
+  author   = c(
+    person("Shinichi", "Nakagawa"),
+    person("Santiago", "Ortega"),
+    person("Ayumi", "Mizuno"),
+    person("Eduardo S.A.", "Santos"),
+    person("Malgorzata", "Lagisz"),
+    person("Bhavya", "Jain"),
+    person("Jimuel Jr", "Celeste"),
+    person("Sergio", "Poo Hernandez")
+  ),
+  year     = format(Sys.Date(), "%Y"),
+  note     = sprintf("R package version %s", meta$Version),
+  url      = "https://github.com/itchyshin/prepR4pcm"
+)

@@ -1,0 +1,274 @@
+---
+title: "From species names to a phylogenetic posterior — prepR4pcm + pigauto"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{From species names to a phylogenetic posterior — prepR4pcm + pigauto}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment  = "#>",
+  eval     = FALSE      # most of this requires datelife / pigauto / network
+)
+```
+
+Phylogenetic comparative methods (PCMs) propagate uncertainty
+imperfectly. The standard pipeline takes one tree, fits one model,
+and reports one set of confidence intervals. But the tree itself is
+typically a point estimate from a posterior, the trait data
+typically have missing values, and each of those is its own source
+of uncertainty.
+
+This vignette walks through a pipeline that handles both:
+
+1. **prepR4pcm** reconciles species names, fetches a *posterior of
+   trees* (not just one), and prepares the data for downstream
+   modelling.
+2. **[pigauto](https://itchyshin.github.io/pigauto/)** imputes the
+   missing trait values, fits the model on each posterior tree, and
+   pools the results via Rubin's rules so the reported standard
+   errors reflect both the tree and imputation uncertainty.
+
+The two packages compose: prepR4pcm produces `multiPhylo`, pigauto
+consumes `multiPhylo`. Once the contract is set up, swapping the
+backend (rtrees vs datelife vs fishtree) doesn't change the rest of
+the pipeline.
+
+## What we'll build
+
+A model-ready dataset for fish, with:
+
+- A posterior of 50 fish chronograms from the Fish Tree of Life
+  (Rabosky et al. 2018).
+- 5 imputations of the missing trait values per tree (so 5 × 50 =
+  250 model fits — adjust `m_per_tree` upward for a real analysis).
+- Pooled estimates with valid standard errors that account for both
+  axes of uncertainty.
+
+```{r setup}
+library(prepR4pcm)
+# Suggests packages we'll lean on:
+# install.packages("fishtree")
+# pak::pak("phylotastic/datelife")
+# Optional, for the pooling step at the end:
+# pak::pak("itchyshin/pigauto")
+```
+
+## Step 1 — Retrieve a posterior of trees
+
+Start with whatever names appear in your dataset. They never quite
+match a tree's tip labels — formatting drifts, synonyms creep in.
+`pr_get_tree()` copes: it normalises every name (underscores,
+whitespace, authority strings) and, for the `fishtree` backend,
+resolves synonyms through Open Tree of Life's Taxonomic Name
+Resolution Service before querying the backend.
+
+```{r data}
+# Your trait data — typically loaded from disk. Names need not be
+# tidy: `Esox_lucius` carries an underscore, which pr_get_tree()
+# normalises away.
+my_data <- data.frame(
+  species   = c("Salmo salar", "Esox_lucius", "Oncorhynchus mykiss"),
+  body_size = c(98, NA, 50)        # NA is fine; pigauto will impute it
+)
+```
+
+Every backend that *can* return multiple trees does so via
+`n_tree > 1`. Here we ask `fishtree` for 50 stochastic resolutions
+(Chang, Rabosky, Alfaro 2019, *Syst. Biol.*).
+
+```{r retrieve, eval = FALSE}
+trees <- pr_get_tree(my_data,
+                     species_col = "species",
+                     source      = "fishtree",
+                     n_tree      = 50)
+
+class(trees$tree)      # "multiPhylo"
+length(trees$tree)     # 50
+trees$matched          # the 3 species, in their original input form
+trees$unmatched        # character(0) — every species was placed
+
+# Per-tree provenance: one list entry per returned tree, each
+# recording source_index, citation, calibration_method, and n_tips.
+length(trees$backend_meta$tree_provenance)   # 50
+trees$backend_meta$tree_provenance[[1]]      # the provenance of tree 1
+```
+
+`pr_get_tree()` records what happened to every name in
+`trees$mapping` (one row per input species), so a name that quietly
+fell out of the tree cannot go unnoticed.
+
+For the universal-but-slower option, use `source = "datelife"` —
+the chronogram-database backend that returns one calibrated tree per
+source (Hedges, Bininda-Emonds, Upham, etc.).
+
+```{r datelife, eval = FALSE}
+trees <- pr_get_tree(my_data,
+                     species_col = "species",
+                     source      = "datelife",
+                     n_tree      = 50)
+# trees$tree is multiPhylo; per-source citations are in
+# trees$backend_meta$tree_provenance[[i]]$citation
+```
+
+If you already have a topology and want to *date* it (rather than
+fetch a new one), use `pr_date_tree()`:
+
+```{r date, eval = FALSE}
+my_topology <- ape::read.tree("my_topology.nex")
+dated_trees <- pr_date_tree(my_topology, n_dated = 50)
+class(dated_trees$tree)        # "multiPhylo"
+length(dated_trees$tree)       # up to 50
+```
+
+**What `n_dated = 50` actually returns**: 50 chronograms that all
+share `my_topology` but have *different branch lengths*. Each
+variant comes from a different source paper in DateLife's database
+(e.g. variant 1 dated against Hedges et al. 2015, variant 2 against
+Bininda-Emonds et al. 2007, etc.). The topology is fixed; the dating
+varies.
+
+To get 50 different *topologies*, fetch them separately first (e.g.
+`pr_get_tree(species, source = "rtrees", taxon = "mammal")` returns
+100 mammal topologies sampled from VertLife / Upham et al. 2019),
+then pass that `multiPhylo` to `pr_date_tree()` to date each one.
+That gives you the topology × source cross-product.
+
+## Step 2 — Reconcile the data to the posterior
+
+`pr_get_tree()` resolves names well enough to *retrieve* a tree, but
+the modelling step needs a data frame whose rows line up one-to-one
+with the tree's tips. `reconcile_tree()` matches your data against
+the retrieved topology, and `reconcile_apply()` returns the aligned
+data–tree pair. The 50 posterior trees share one tip set, so
+reconciling against the first tree aligns the data to all of them.
+
+```{r reconcile, eval = FALSE}
+rec <- reconcile_tree(my_data, trees$tree[[1]],
+                      x_species = "species",
+                      authority = NULL)   # tree tips are plain binomials
+rec        # match summary: 1 exact, 2 normalized, 0 unresolved
+
+aligned <- reconcile_apply(rec,
+                           data            = my_data,
+                           tree            = trees$tree[[1]],
+                           species_col     = "species",
+                           drop_unresolved = TRUE)
+
+aligned$data    # one row per tree tip — the model-ready frame
+#>               species body_size
+#> 1         Salmo salar        98
+#> 2         Esox_lucius        NA
+#> 3 Oncorhynchus mykiss        50
+```
+
+`aligned$data` carries one row per species in the tree, with
+`Esox_lucius` keeping the `NA` that pigauto will impute;
+`aligned$tree` is the matching pruned tree.
+
+## Step 3 — Format citations (do this *before* you submit)
+
+Reviewers ask. Save yourself the round-trip.
+
+```{r cite, eval = FALSE}
+# Plain text for an email or a methods paragraph
+pr_cite_tree(trees)
+
+# Markdown for a GitHub issue or PR description
+cat(pr_cite_tree(trees, format = "markdown"))
+
+# BibTeX for a manuscript bibliography (sanity-check before submitting)
+cat(pr_cite_tree(trees, format = "bibtex"))
+```
+
+## Step 4 — Hand the posterior to pigauto
+
+This is the contract. `pigauto::multi_impute_trees(df, trees, m_per_tree)`
+takes `df` (data with NAs) and `trees` (`multiPhylo`) and returns
+`m_per_tree` complete-data imputations *per tree*. The output knows
+which imputation came from which tree, and pigauto's pooling step
+later uses that index.
+
+```{r pigauto, eval = FALSE}
+library(pigauto)
+
+# 5 imputations per tree × 50 trees = 250 complete datasets
+mi <- multi_impute_trees(aligned$data,
+                         trees      = trees$tree,
+                         m_per_tree = 5)
+
+# Fit your model to each completed dataset. Replace the formula
+# with whatever your hypothesis is.
+fits <- with_imputations(mi, function(df) {
+  glmmTMB::glmmTMB(body_size ~ 1 + (1 | species),
+                   data = df)
+})
+
+# Pool via Rubin's rules — the standard errors reflect BOTH the
+# imputation uncertainty AND the tree-posterior uncertainty.
+pooled <- pool_mi(fits,
+                  coef_fun = function(fit) fixef(fit)$cond,
+                  vcov_fun = function(fit) vcov(fit)$cond)
+
+pooled
+```
+
+The reported intervals are wider than the equivalent
+single-tree-single-imputation pipeline — and *correctly* so. The
+narrower intervals were always overconfident.
+
+## Choosing a backend
+
+Verified on a clean macOS R 4.4 install on 2026-05-01. See the
+[Comparing tree backends](comparing-tree-backends.html) vignette
+for the full status table.
+
+| If your taxon is... | And you want... | Use | Status |
+|---|---|---|---|
+| Universal | A single best-guess tree | `pr_get_tree(source = "rotl")` | ✅ verified — returns the Open Tree of Life synthesis tree |
+| Universal | A posterior of dated trees | `pr_get_tree(source = "datelife", n_tree = 50)` | likely ✅ — `datelife` is in `Enhances`; install separately with `pak::pak("phylotastic/datelife")` |
+| Birds | A single tree, current Clements | `pr_get_tree(source = "clootl", n_tree = 1)` | ✅ verified — works out of the box (uses the v1.6/2025 taxonomy bundled with `clootl`) |
+| Birds | A posterior of trees, current Clements | `pr_get_tree(source = "clootl", n_tree = 50)` | ⚠️ requires `clootl::get_avesdata_repo(".")` once before this works; without it `sampleTrees()` errors with `AvesData repo not found`. Capped at 100 upstream. |
+| Fish | Time-calibrated, posterior | `pr_get_tree(source = "fishtree", n_tree = 50)` | ✅ verified — returns `multiPhylo[50]` |
+| Bird, mammal, fish, amphibian, reptile, plant, shark, bee, butterfly | Taxon-specific mega-tree, possibly grafted | `pr_get_tree(source = "rtrees", taxon = "<group>")` | ✅ works; ⚠️ `n_tree` is **informational only** — `rtrees::get_tree()` has no `n_tree` argument, so the count is fixed by the chosen mega-tree (`taxon = "bird"` → 100, `taxon = "mammal"` → 100, `taxon = "fish"` → 1, etc.). |
+
+For the dating-only case (you already have a topology):
+
+| If your topology is... | Use | Status |
+|---|---|---|
+| Universal taxa | `pr_date_tree(my_tree, n_dated = 50)` | likely ✅ — untested in this run; same dependency story as `datelife` |
+
+## What's *not* in this pipeline
+
+- **Tree comparison across backends.** prepR4pcm provides
+  `pr_tree_compare()` for quick pairwise Jaccard / Robinson-Foulds /
+  branch-length comparisons (see the
+  [comparing tree backends vignette](comparing-tree-backends.html)).
+  For richer visual comparison use `phytools::cophyloplot()` or
+  `phangorn::densiTree()`.
+- **Trait imputation alone.** That's pigauto's `impute()` /
+  `multi_impute()`. This vignette skips straight to the
+  trees-aware variant because that's the integration point.
+
+For repeated runs of the same retrieval (e.g. while iterating on a
+manuscript), pass `cache = TRUE` to `pr_get_tree()`. The cache lives
+under `tools::R_user_dir()` by default; redirect with
+`pr_tree_cache_dir()` if you want it inside the project.
+
+## See also
+
+- `?pr_get_tree`, `?pr_date_tree`, `?pr_cite_tree`,
+  `?reconcile_augment` --- the four entry points for prepR4pcm's
+  tree-handling.
+- [pigauto's full PCM workflow vignette](https://itchyshin.github.io/pigauto/articles/mixed-types.html)
+  --- the downstream half, in detail.
+- Sanchez Reyes et al. (2024). *DateLife: Leveraging databases and
+  analytical tools to reveal the dated Tree of Life.* Systematic
+  Biology 73(2): 470–485.
+  DOI 10.1093/sysbio/syae015.
+- Rabosky et al. (2018). *An inverse latitudinal gradient in
+  speciation rate for marine fishes.* Nature 559: 392–395.
+  DOI 10.1038/s41586-018-0273-1.

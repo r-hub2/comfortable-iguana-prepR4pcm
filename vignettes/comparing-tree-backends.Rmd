@@ -1,0 +1,411 @@
+---
+title: "Comparing tree backends — when do they agree?"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Comparing tree backends — when do they agree?}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment  = "#>",
+  eval     = FALSE
+)
+```
+
+`prepR4pcm` can fetch a phylogenetic tree for your species from five
+different *backends* — external packages, each wrapped by
+`pr_get_tree()`, that supply a tree from a different reference
+source. The five backends draw on different reference trees,
+different taxonomies, and different calibration approaches, so the
+tree you get depends on which backend you pick. This vignette
+answers *how much* they disagree, and *where*.
+
+This vignette walks through `pr_tree_compare()` and shows how to
+use it to make a defensible backend choice for your dataset — or to
+report which backend choice you made and what the alternatives
+would have given.
+
+## Setup
+
+Comparison requires multiple tree-retrieval backends installed. Each
+backend lives in a different package because each draws on a
+different reference tree or taxonomy:
+
+- **`rotl`** (CRAN): client for the
+  [Open Tree of Life](https://tree.opentreeoflife.org) synthesis
+  tree — the only backend with universal taxon coverage. Required
+  for `source = "rotl"`.
+- **`fishtree`** (CRAN): wraps the
+  [Fish Tree of Life](https://fishtreeoflife.org) (Rabosky et al.
+  2018), a time-calibrated ray-finned fish phylogeny. Required for
+  `source = "fishtree"`.
+- **`rtrees`** (CRAN; [project site](https://github.com/daijiang/rtrees)):
+  grafts species onto taxon-specific mega-trees (mammals, birds,
+  fish, amphibians, etc.). Required for `source = "rtrees"`.
+- **`clootl`** (CRAN;
+  [project site](https://github.com/eliotmiller/clootl)):
+  supplies a phylogeny in the current Clements bird taxonomy.
+  Required for `source = "clootl"`.
+- **`datelife`**: synthesis chronograms
+  assembled from many per-clade published trees. Required for
+  `source = "datelife"`.
+
+Install whichever you need. CRAN packages first, then GitHub-only
+backends via `pak`:
+
+```{r setup, eval = TRUE}
+library(prepR4pcm)
+# install.packages(c("rotl", "rtrees", "clootl", "fishtree")) # CRAN
+# pak::pak("phylotastic/datelife")                        # GitHub (heavy)
+```
+
+Check what's installed and reachable in your session:
+
+```{r status, eval = TRUE}
+pr_get_tree_status()
+```
+
+## The recipe
+
+Pick a small species list. Retrieve the same set from two or three
+backends. Compare.
+
+```{r retrieve}
+species <- c("Salmo salar", "Esox lucius", "Oncorhynchus mykiss",
+             "Gadus morhua", "Thunnus thynnus")
+
+# Three backends that all cover fish
+res_rotl     <- pr_get_tree(species, source = "rotl")
+res_fishtree <- pr_get_tree(species, source = "fishtree")
+res_rtrees   <- pr_get_tree(species, source = "rtrees", taxon = "fish")
+```
+
+**About the `TNRS replaced ...` warning.** `pr_get_tree()` runs the
+Open Tree of Life Taxonomic Name Resolution Service (TNRS) on the
+input names before passing them to the backend, so that minor
+spelling or capitalisation differences don't cause a name to fall
+out of the tree silently. When TNRS finds a canonical form that
+differs from the input (e.g. an old binomial replaced by the
+current synonym), the wrapper substitutes the canonical form and
+emits a warning listing each replacement, so the substitution is
+visible in the run log. The retrieval still succeeds; the warning is
+informational.
+
+The three results are independent. Now compare:
+
+```{r compare}
+cmp <- pr_tree_compare(
+  rotl     = res_rotl,
+  fishtree = res_fishtree,
+  rtrees   = res_rtrees
+)
+cmp
+```
+
+The print method shows up to three pairwise matrices, depending on
+what is computable for your set of trees. Reading them:
+
+- **Tip-set Jaccard** — fraction of species both trees place. 1.0 =
+  same species set. 0.0 = no overlap. If any pairwise value is < 1,
+  the two trees do not cover the same species set, so the
+  topological comparison below is restricted to the species both
+  trees include.
+- **Robinson-Foulds distance** — number of internal edges that
+  differ between the two trees, restricted to their shared tip set.
+  Lower = trees agree more. **`NA` off-diagonal** means the
+  shared-tip subtree has fewer than four taxa (Robinson-Foulds is
+  undefined below four shared tips), or one of the input trees
+  could not be pruned to the shared subtree without becoming
+  degenerate. Diagonal values are always 0 (a tree against itself).
+- **Branch-length correlation** — Pearson correlation of sorted
+  edge lengths after pruning to the shared subtree. Useful as a
+  rough check on whether two chronograms use the same
+  branch-length scale (e.g. millions of years vs unit-length
+  placeholders). **This matrix is only printed when at least one
+  pair has computable branch lengths on both sides.** If `rotl`
+  trees (which carry unit-length placeholder branches) are part of
+  the comparison, the matrix may collapse to NA and the print
+  method drops it; that is why you sometimes see only two matrices
+  rather than three.
+
+## What actually works (status table)
+
+Backends differ in coverage and in what `n_tree > 1` does. Verified
+on a clean macOS R 4.4 install on 2026-05-01. Column meanings:
+
+- **Backend** — the value you pass as `source = "..."` to
+  `pr_get_tree()`.
+- **Single tree** — does `pr_get_tree(..., n_tree = 1)` (the
+  default) return a single `ape::phylo` object cleanly?
+- **Multi-tree (`n_tree > 1`)** — does the backend support
+  returning a posterior or sample of trees? Some backends ship a
+  single mega-tree and ignore `n_tree`; others support a true
+  posterior sample.
+- **Notes** — backend-specific gotchas worth knowing before you
+  trust the result.
+
+| Backend | Single tree | Multi-tree (`n_tree > 1`) | Notes |
+|---|---|---|---|
+| `rotl` | ✅ | n/a — synthesis is a single tree | Returns lowercase tip labels (e.g. `salmo salar`) because Open Tree taxonomy names are case-folded; reconcile against the tree if your input mixes cases. |
+| `rtrees` | ✅ | ✅ for taxa whose mega-tree is a posterior (e.g. `taxon = "bird"`, `"mammal"` → 100 trees); returns 1 tree for taxa with a single mega-tree (e.g. `taxon = "fish"`). | `n_tree` is **informational only** — `rtrees::get_tree()` has no `n_tree` argument, so the count is fixed by the chosen mega-tree. |
+| `clootl` | ✅ | ❌ unless the AvesData repo is installed (run `clootl::get_avesdata_repo(".")` once). `n_tree = 1` calls `clootl::extractTree()` and works out of the box; `n_tree > 1` calls `clootl::sampleTrees(count = …)` and needs AvesData. | The single-tree path uses the v1.6 / 2025 taxonomy bundled with `clootl`. Posterior sampling caps at 100 upstream. |
+| `fishtree` | ✅ | ✅ — `n_tree > 1` switches to `fishtree::fishtree_complete_phylogeny()` and returns the requested count. | Time-calibrated. |
+| `datelife` | likely ✅ | likely ✅ | Untested in this run because `datelife` is in `Enhances` (heavy Bioconductor / BOLD deps). Install with `pak::pak("phylotastic/datelife")`. |
+| `pr_date_tree()` | likely ✅ | likely ✅ | Same dependency story as `datelife`. |
+
+If you hit a **broken** row above on a fresh install, please open an
+issue at
+[itchyshin/prepR4pcm](https://github.com/itchyshin/prepR4pcm/issues)
+with your `pr_get_tree_status()` output and the error.
+
+## Branch lengths and time-calibration
+
+Phylogenetic comparative methods (PGLS with Pagel's λ, Brownian
+motion, OU, phylogenetic meta-analysis) need branch lengths that
+correspond to *time* — not just topology. Backends differ in what
+branch lengths they produce:
+
+| Backend | Branch lengths produced | Real time? | Taxonomic scope |
+|---|---|---|---|
+| `rotl` (default) | None — synthesis topology only | No | Universal |
+| `rotl` + `resolve_polytomies = TRUE, branch_lengths = "grafen"` | Grafen ρ = 1 arbitrary depths | No (arbitrary) | Universal |
+| `fishtree` | Yes — divergence times from Rabosky et al. 2018 | **Yes** | Ray-finned fish |
+| `clootl` | Yes — Bird Tree consensus branches | **Yes** | Birds (current Clements) |
+| `rtrees` (any `taxon`) | Yes — branches from `megatrees` posterior | **Yes** | Birds, mammals, fish, amphibians, reptiles, plants, sharks, bees, butterflies |
+| `datelife` | Yes — SDM-summary chronograms or per-source candidates | **Yes** | Universal |
+| `pr_date_tree(tree)` | Yes — calibrates *your* topology via DateLife | **Yes** | Universal |
+| Manual `ape::chronos()` with user calibration points | Yes | **Yes** | Universal |
+
+The decision tree, in practice:
+
+1. **Is your taxon covered by a dedicated time-calibrated backend?**
+   For fish use `fishtree`; for birds, mammals, amphibians, squamates,
+   sharks, or plants use `rtrees` with the matching `taxon`. These
+   are pre-computed, pre-dated, and need no extra dependencies.
+2. **Is your taxon set cross-clade (e.g. a thermal-tolerance dataset
+   spanning lampreys, bivalves, insects, fish, amphibians, reptiles)?**
+   Then your options are:
+    a. `datelife` for a real time-calibrated solution. Install via
+      `pak::pak("phylotastic/datelife")`. Heavy dependency tree
+      (Bioconductor, BOLD); usually works on macOS / Linux with
+      system libs, sometimes flaky on Windows.
+    b. `rotl + resolve_polytomies = TRUE, branch_lengths = "grafen"`
+      for Grafen pseudo-time. Defensible for phylogenetic meta-
+      analysis where you mainly need a correlation structure, not
+      real divergence times (this is the pattern Cinar et al. 2022
+      and Pottier et al. 2022 use). See the
+      [phylogenetic meta-analysis vignette](meta-analysis-with-rotl.html)
+      for a worked example.
+    c. Hand-curated calibration points + `ape::chronos()` if you
+      have published divergence-time estimates for a small set of
+      nodes.
+3. **Do you already have a topology you want time-calibrated?**
+   `pr_date_tree(your_tree)` wraps `datelife::datelife_use()` and
+   has the same install requirement as the `datelife` backend.
+
+If `datelife` is the option you want and it won't install on your
+system, the practical fallbacks (in roughly preferred order) are:
+the dedicated taxon backend if one exists for your taxa; Grafen
+pseudo-time for meta-analysis-style use; or hand calibration for
+small, well-studied taxon sets.
+
+## Where are the VertLife trees?
+
+A common question: *"I want the VertLife / Upham et al. 2019 mammal
+posterior — which backend has it?"*
+
+Short answer: **`source = "rtrees"`** has them. `rtrees` depends on
+the [`megatrees`](https://github.com/daijiang/megatrees) package,
+which ships 100 randomly-sampled posterior trees from each of the
+major VertLife datasets (mammals: Upham et al. 2019; amphibians:
+Jetz & Pyron 2018; squamates: Tonini et al. 2016; sharks: Stein et
+al. 2018; birds: Jetz et al. 2012). When you call
+`pr_get_tree(species, source = "rtrees", taxon = "mammal")`, the
+returned `multiPhylo` is exactly that 100-tree subset of the
+VertLife posterior, grafted to your species set.
+
+If you need the **full 10,000-tree posterior** (rather than the
+100-tree subset), you currently have to download the source archive
+manually from [vertlife.org](https://vertlife.org/data/) (each
+archive is 0.5–2 GB). A future round may add a `source = "vertlife"`
+backend that automates this caching step; for now, the 100-tree
+subset via `rtrees` is what you get out of the box, which is
+sufficient for the great majority of phylogenetic comparative
+analyses.
+
+## Note on tip labels before comparing
+
+The three backends use different conventions for tip labels:
+
+- **`rotl`** appends an Open Tree OTT id to each tip
+  (e.g. `Salmo_salar_ott854188`) and lower-cases the binomial.
+- **`fishtree`** returns the canonical binomial with spaces
+  (`Salmo salar`).
+- **`rtrees`** returns the canonical binomial with underscores
+  (`Salmo_salar`).
+
+`pr_tree_compare()` matches tips by **case- and separator-folded
+binomial** (it strips `_ott<digits>`, converts underscores to
+spaces, and lower-cases) before computing Jaccard, so you do not
+need to clean the labels yourself for the comparison to work. The
+folded form is used only for matching; the original tip labels are
+preserved in each tree.
+
+If you intend to use one of the returned trees downstream (e.g.
+feed it to `pr_phylo_cor()` and then to `metafor::rma.mv()`), you
+will usually want to strip those suffixes yourself with
+`gsub("_ott\\d+", "", tree$tip.label)` first. See the
+*meta-analysis-with-rotl* vignette for that workflow.
+
+## What to do with the result
+
+### When the backends return the same species set and similar topology (Jaccard ≈ 1, RF small)
+
+The backends return the same species set (Jaccard ≈ 1) and broadly
+similar topologies (low Robinson-Foulds distance). Pick whichever
+backend best matches your taxonomic / temporal needs. Document the
+choice. Call `pr_cite_tree()` to capture the citation:
+
+```{r cite}
+pr_cite_tree(res_fishtree, format = "markdown")
+```
+
+### When tip sets differ (Jaccard < 1)
+
+The backends disagree on which species are valid. Inspect the
+unique-to lists:
+
+```{r unique-to}
+cmp$unique_to$rotl     # species rotl placed but the others didn't
+cmp$unique_to$fishtree # species fishtree placed but the others didn't
+cmp$shared_tips        # species placed by all backends
+```
+
+Common causes:
+
+- **Taxonomy difference.** rotl uses Open Tree taxonomy; fishtree
+  uses its own; clootl uses Clements. The *same* species may have
+  different canonical names.
+- **Coverage gap.** A species is in one reference tree but not
+  another (often a recently described species).
+- **Synonymy.** One backend matches via synonymy, another doesn't.
+
+Mitigation: re-run with `tnrs = "always"` to harmonise names via
+Open Tree's TNRS first. See `?pr_get_tree`.
+
+### When topologies disagree (RF large)
+
+The trees agree on which species exist but disagree on how they're
+related. This is the genuinely interesting case.
+
+- For exploratory analyses, fit your model on each tree and report
+  the range of estimates across them.
+- For the analysis you intend to publish, pick the backend whose
+  underlying phylogeny is the best-established for your taxon — the
+  most recent, most densely sampled peer-reviewed tree for that
+  group: `fishtree` for ray-finned fish, `clootl` for birds, and
+  `datelife` for groups that need time-calibrated branch lengths
+  and have no taxon-specific tree.
+
+The companion package
+[pigauto](https://itchyshin.github.io/pigauto/) is built for this:
+hand it the multiPhylo of every backend's tree, fit your model on
+each, and pool the results via Rubin's rules. A single-tree
+analysis reports its confidence intervals as if the tree were known
+exactly — but it is not, and a different backend would have given a
+different tree. Pooling across the backends' trees widens the
+intervals to absorb that *tree-choice uncertainty*, so the reported
+intervals are not falsely narrow.
+
+```{r pigauto-multi-backend}
+# Fitting across backends (not just within a backend's posterior)
+all_trees <- structure(list(res_rotl$tree, res_fishtree$tree,
+                            res_rtrees$tree[[1]]),
+                       class = "multiPhylo")
+# pigauto::multi_impute_trees(trait_data, all_trees, m_per_tree = 5)
+```
+
+### When branch-length correlation is low
+
+The trees agree on topology but not on **branch-length scale**.
+Usually that is because one tree is time-calibrated (branch lengths
+in millions of years) and the other is not (branch lengths in
+unit-length placeholders, or in Grafen-units, or in some other
+non-time scale):
+
+- `rotl` returns the synthesis tree with no calibration.
+- `rtrees` grafts onto a reference tree; calibration is whatever the
+  reference uses.
+- `fishtree` and `clootl` and `datelife` all return time-calibrated
+  trees.
+
+If your downstream model expects calibrated branches (most BM /
+OU / lambda models do), use a calibrated backend. If the only
+calibrated option for your taxon is `datelife`, see
+`?pr_date_tree` for dating an existing topology.
+
+## Caching the comparisons
+
+Each retrieval is slow. If you're going to compare backends, set
+`cache = TRUE` so re-running the vignette is instant:
+
+```{r cache}
+old_cache <- getOption("prepR4pcm.cache_dir", NULL)
+tmp_cache <- tempfile("prepR4pcm-cache-")
+pr_tree_cache_dir(tmp_cache)
+
+res_rotl     <- pr_get_tree(species, source = "rotl",
+                             cache = TRUE)
+res_fishtree <- pr_get_tree(species, source = "fishtree",
+                             cache = TRUE)
+res_rtrees   <- pr_get_tree(species, source = "rtrees",
+                             taxon  = "fish", cache = TRUE)
+
+# See what's cached
+pr_tree_cache_status()
+
+# Wipe just the rotl entries (e.g. after an OTT version refresh)
+pr_tree_cache_clear(source = "rotl", confirm = FALSE)
+
+options(prepR4pcm.cache_dir = old_cache)
+unlink(tmp_cache, recursive = TRUE)
+```
+
+By default the cache lives at `tools::R_user_dir()`. Pass an explicit
+temporary or project cache directory if you want a separate cache for a
+specific analysis:
+
+```{r project-cache}
+old_cache <- getOption("prepR4pcm.cache_dir", NULL)
+tmp_cache <- tempfile("prepR4pcm-cache-")
+pr_tree_cache_dir(tmp_cache)
+options(prepR4pcm.cache_dir = old_cache)
+unlink(tmp_cache, recursive = TRUE)
+```
+
+## What `pr_tree_compare()` doesn't do (yet)
+
+- **Bipartition-matched branch-length correlation.** The current
+  implementation correlates *sorted* edge lengths, which is a coarse
+  but defensible "do they agree on rate scale" check. A proper
+  bipartition-matched correlation is a future-round refinement.
+- **Visualisation.** Pair with `phytools::cophyloplot()` or
+  `phangorn::densiTree()` for visual comparison of two or many
+  trees.
+- **Three-or-more-tree consensus.** For "what's the median tree
+  across these three backends?", use
+  `phangorn::consensus(c(res_rotl$tree, res_fishtree$tree, res_rtrees$tree[[1]]))`.
+
+## See also
+
+- `?pr_tree_compare` — full reference for the comparison function.
+- `?pr_get_tree` — the main function for fetching a tree.
+- `?pr_get_tree_status` — lists which backends are installed and
+  reachable in your session.
+- `?pr_tree_cache_dir` — manage the on-disk cache of retrieved trees.
+- The
+  [posterior-tree pipeline vignette](posterior-tree-pipeline.html)
+  for the prepR4pcm → pigauto integration.

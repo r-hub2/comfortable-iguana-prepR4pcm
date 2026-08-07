@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>From species names to a phylogenetic posterior — prepR4pcm + pigauto</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">From species names to a phylogenetic
+posterior — prepR4pcm + pigauto</h1>
+
+
+
+<p>Phylogenetic comparative methods (PCMs) propagate uncertainty
+imperfectly. The standard pipeline takes one tree, fits one model, and
+reports one set of confidence intervals. But the tree itself is
+typically a point estimate from a posterior, the trait data typically
+have missing values, and each of those is its own source of
+uncertainty.</p>
+<p>This vignette walks through a pipeline that handles both:</p>
+<ol style="list-style-type: decimal">
+<li><strong>prepR4pcm</strong> reconciles species names, fetches a
+<em>posterior of trees</em> (not just one), and prepares the data for
+downstream modelling.</li>
+<li><strong><a href="https://itchyshin.github.io/pigauto/">pigauto</a></strong> imputes
+the missing trait values, fits the model on each posterior tree, and
+pools the results via Rubin’s rules so the reported standard errors
+reflect both the tree and imputation uncertainty.</li>
+</ol>
+<p>The two packages compose: prepR4pcm produces <code>multiPhylo</code>,
+pigauto consumes <code>multiPhylo</code>. Once the contract is set up,
+swapping the backend (rtrees vs datelife vs fishtree) doesn’t change the
+rest of the pipeline.</p>
+<div id="what-well-build" class="section level2">
+<h2>What we’ll build</h2>
+<p>A model-ready dataset for fish, with:</p>
+<ul>
+<li>A posterior of 50 fish chronograms from the Fish Tree of Life
+(Rabosky et al. 2018).</li>
+<li>5 imputations of the missing trait values per tree (so 5 × 50 = 250
+model fits — adjust <code>m_per_tree</code> upward for a real
+analysis).</li>
+<li>Pooled estimates with valid standard errors that account for both
+axes of uncertainty.</li>
+</ul>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(prepR4pcm)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="co"># Suggests packages we&#39;ll lean on:</span></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="co"># install.packages(&quot;fishtree&quot;)</span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="co"># pak::pak(&quot;phylotastic/datelife&quot;)</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="co"># Optional, for the pooling step at the end:</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="co"># pak::pak(&quot;itchyshin/pigauto&quot;)</span></span></code></pre></div>
+</div>
+<div id="step-1-retrieve-a-posterior-of-trees" class="section level2">
+<h2>Step 1 — Retrieve a posterior of trees</h2>
+<p>Start with whatever names appear in your dataset. They never quite
+match a tree’s tip labels — formatting drifts, synonyms creep in.
+<code>pr_get_tree()</code> copes: it normalises every name (underscores,
+whitespace, authority strings) and, for the <code>fishtree</code>
+backend, resolves synonyms through Open Tree of Life’s Taxonomic Name
+Resolution Service before querying the backend.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co"># Your trait data — typically loaded from disk. Names need not be</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="co"># tidy: `Esox_lucius` carries an underscore, which pr_get_tree()</span></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co"># normalises away.</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>my_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>  <span class="at">species   =</span> <span class="fu">c</span>(<span class="st">&quot;Salmo salar&quot;</span>, <span class="st">&quot;Esox_lucius&quot;</span>, <span class="st">&quot;Oncorhynchus mykiss&quot;</span>),</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>  <span class="at">body_size =</span> <span class="fu">c</span>(<span class="dv">98</span>, <span class="cn">NA</span>, <span class="dv">50</span>)        <span class="co"># NA is fine; pigauto will impute it</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>)</span></code></pre></div>
+<p>Every backend that <em>can</em> return multiple trees does so via
+<code>n_tree &gt; 1</code>. Here we ask <code>fishtree</code> for 50
+stochastic resolutions (Chang, Rabosky, Alfaro 2019, <em>Syst.
+Biol.</em>).</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>trees <span class="ot">&lt;-</span> <span class="fu">pr_get_tree</span>(my_data,</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>                     <span class="at">species_col =</span> <span class="st">&quot;species&quot;</span>,</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>                     <span class="at">source      =</span> <span class="st">&quot;fishtree&quot;</span>,</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>                     <span class="at">n_tree      =</span> <span class="dv">50</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="fu">class</span>(trees<span class="sc">$</span>tree)      <span class="co"># &quot;multiPhylo&quot;</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="fu">length</span>(trees<span class="sc">$</span>tree)     <span class="co"># 50</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>trees<span class="sc">$</span>matched          <span class="co"># the 3 species, in their original input form</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>trees<span class="sc">$</span>unmatched        <span class="co"># character(0) — every species was placed</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co"># Per-tree provenance: one list entry per returned tree, each</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co"># recording source_index, citation, calibration_method, and n_tips.</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="fu">length</span>(trees<span class="sc">$</span>backend_meta<span class="sc">$</span>tree_provenance)   <span class="co"># 50</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>trees<span class="sc">$</span>backend_meta<span class="sc">$</span>tree_provenance[[<span class="dv">1</span>]]      <span class="co"># the provenance of tree 1</span></span></code></pre></div>
+<p><code>pr_get_tree()</code> records what happened to every name in
+<code>trees$mapping</code> (one row per input species), so a name that
+quietly fell out of the tree cannot go unnoticed.</p>
+<p>For the universal-but-slower option, use
+<code>source = &quot;datelife&quot;</code> — the chronogram-database backend that
+returns one calibrated tree per source (Hedges, Bininda-Emonds, Upham,
+etc.).</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>trees <span class="ot">&lt;-</span> <span class="fu">pr_get_tree</span>(my_data,</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>                     <span class="at">species_col =</span> <span class="st">&quot;species&quot;</span>,</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>                     <span class="at">source      =</span> <span class="st">&quot;datelife&quot;</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>                     <span class="at">n_tree      =</span> <span class="dv">50</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="co"># trees$tree is multiPhylo; per-source citations are in</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co"># trees$backend_meta$tree_provenance[[i]]$citation</span></span></code></pre></div>
+<p>If you already have a topology and want to <em>date</em> it (rather
+than fetch a new one), use <code>pr_date_tree()</code>:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>my_topology <span class="ot">&lt;-</span> ape<span class="sc">::</span><span class="fu">read.tree</span>(<span class="st">&quot;my_topology.nex&quot;</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>dated_trees <span class="ot">&lt;-</span> <span class="fu">pr_date_tree</span>(my_topology, <span class="at">n_dated =</span> <span class="dv">50</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="fu">class</span>(dated_trees<span class="sc">$</span>tree)        <span class="co"># &quot;multiPhylo&quot;</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="fu">length</span>(dated_trees<span class="sc">$</span>tree)       <span class="co"># up to 50</span></span></code></pre></div>
+<p><strong>What <code>n_dated = 50</code> actually returns</strong>: 50
+chronograms that all share <code>my_topology</code> but have
+<em>different branch lengths</em>. Each variant comes from a different
+source paper in DateLife’s database (e.g. variant 1 dated against Hedges
+et al. 2015, variant 2 against Bininda-Emonds et al. 2007, etc.). The
+topology is fixed; the dating varies.</p>
+<p>To get 50 different <em>topologies</em>, fetch them separately first
+(e.g.
+<code>pr_get_tree(species, source = &quot;rtrees&quot;, taxon = &quot;mammal&quot;)</code>
+returns 100 mammal topologies sampled from VertLife / Upham et
+al. 2019), then pass that <code>multiPhylo</code> to
+<code>pr_date_tree()</code> to date each one. That gives you the
+topology × source cross-product.</p>
+</div>
+<div id="step-2-reconcile-the-data-to-the-posterior" class="section level2">
+<h2>Step 2 — Reconcile the data to the posterior</h2>
+<p><code>pr_get_tree()</code> resolves names well enough to
+<em>retrieve</em> a tree, but the modelling step needs a data frame
+whose rows line up one-to-one with the tree’s tips.
+<code>reconcile_tree()</code> matches your data against the retrieved
+topology, and <code>reconcile_apply()</code> returns the aligned
+data–tree pair. The 50 posterior trees share one tip set, so reconciling
+against the first tree aligns the data to all of them.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>rec <span class="ot">&lt;-</span> <span class="fu">reconcile_tree</span>(my_data, trees<span class="sc">$</span>tree[[<span class="dv">1</span>]],</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>                      <span class="at">x_species =</span> <span class="st">&quot;species&quot;</span>,</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>                      <span class="at">authority =</span> <span class="cn">NULL</span>)   <span class="co"># tree tips are plain binomials</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>rec        <span class="co"># match summary: 1 exact, 2 normalized, 0 unresolved</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>aligned <span class="ot">&lt;-</span> <span class="fu">reconcile_apply</span>(rec,</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>                           <span class="at">data            =</span> my_data,</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>                           <span class="at">tree            =</span> trees<span class="sc">$</span>tree[[<span class="dv">1</span>]],</span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>                           <span class="at">species_col     =</span> <span class="st">&quot;species&quot;</span>,</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>                           <span class="at">drop_unresolved =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>aligned<span class="sc">$</span>data    <span class="co"># one row per tree tip — the model-ready frame</span></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="co">#&gt;               species body_size</span></span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="co">#&gt; 1         Salmo salar        98</span></span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="co">#&gt; 2         Esox_lucius        NA</span></span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="co">#&gt; 3 Oncorhynchus mykiss        50</span></span></code></pre></div>
+<p><code>aligned$data</code> carries one row per species in the tree,
+with <code>Esox_lucius</code> keeping the <code>NA</code> that pigauto
+will impute; <code>aligned$tree</code> is the matching pruned tree.</p>
+</div>
+<div id="step-3-format-citations-do-this-before-you-submit" class="section level2">
+<h2>Step 3 — Format citations (do this <em>before</em> you submit)</h2>
+<p>Reviewers ask. Save yourself the round-trip.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># Plain text for an email or a methods paragraph</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="fu">pr_cite_tree</span>(trees)</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co"># Markdown for a GitHub issue or PR description</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">pr_cite_tree</span>(trees, <span class="at">format =</span> <span class="st">&quot;markdown&quot;</span>))</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co"># BibTeX for a manuscript bibliography (sanity-check before submitting)</span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">pr_cite_tree</span>(trees, <span class="at">format =</span> <span class="st">&quot;bibtex&quot;</span>))</span></code></pre></div>
+</div>
+<div id="step-4-hand-the-posterior-to-pigauto" class="section level2">
+<h2>Step 4 — Hand the posterior to pigauto</h2>
+<p>This is the contract.
+<code>pigauto::multi_impute_trees(df, trees, m_per_tree)</code> takes
+<code>df</code> (data with NAs) and <code>trees</code>
+(<code>multiPhylo</code>) and returns <code>m_per_tree</code>
+complete-data imputations <em>per tree</em>. The output knows which
+imputation came from which tree, and pigauto’s pooling step later uses
+that index.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">library</span>(pigauto)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="co"># 5 imputations per tree × 50 trees = 250 complete datasets</span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>mi <span class="ot">&lt;-</span> <span class="fu">multi_impute_trees</span>(aligned<span class="sc">$</span>data,</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>                         <span class="at">trees      =</span> trees<span class="sc">$</span>tree,</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>                         <span class="at">m_per_tree =</span> <span class="dv">5</span>)</span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co"># Fit your model to each completed dataset. Replace the formula</span></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="co"># with whatever your hypothesis is.</span></span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a>fits <span class="ot">&lt;-</span> <span class="fu">with_imputations</span>(mi, <span class="cf">function</span>(df) {</span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>  glmmTMB<span class="sc">::</span><span class="fu">glmmTMB</span>(body_size <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> species),</span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a>                   <span class="at">data =</span> df)</span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a>})</span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a></span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a><span class="co"># Pool via Rubin&#39;s rules — the standard errors reflect BOTH the</span></span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a><span class="co"># imputation uncertainty AND the tree-posterior uncertainty.</span></span>
+<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a>pooled <span class="ot">&lt;-</span> <span class="fu">pool_mi</span>(fits,</span>
+<span id="cb8-18"><a href="#cb8-18" tabindex="-1"></a>                  <span class="at">coef_fun =</span> <span class="cf">function</span>(fit) <span class="fu">fixef</span>(fit)<span class="sc">$</span>cond,</span>
+<span id="cb8-19"><a href="#cb8-19" tabindex="-1"></a>                  <span class="at">vcov_fun =</span> <span class="cf">function</span>(fit) <span class="fu">vcov</span>(fit)<span class="sc">$</span>cond)</span>
+<span id="cb8-20"><a href="#cb8-20" tabindex="-1"></a></span>
+<span id="cb8-21"><a href="#cb8-21" tabindex="-1"></a>pooled</span></code></pre></div>
+<p>The reported intervals are wider than the equivalent
+single-tree-single-imputation pipeline — and <em>correctly</em> so. The
+narrower intervals were always overconfident.</p>
+</div>
+<div id="choosing-a-backend" class="section level2">
+<h2>Choosing a backend</h2>
+<p>Verified on a clean macOS R 4.4 install on 2026-05-01. See the <a href="comparing-tree-backends.html">Comparing tree backends</a> vignette
+for the full status table.</p>
+<table>
+<colgroup>
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>If your taxon is…</th>
+<th>And you want…</th>
+<th>Use</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Universal</td>
+<td>A single best-guess tree</td>
+<td><code>pr_get_tree(source = &quot;rotl&quot;)</code></td>
+<td>✅ verified — returns the Open Tree of Life synthesis tree</td>
+</tr>
+<tr class="even">
+<td>Universal</td>
+<td>A posterior of dated trees</td>
+<td><code>pr_get_tree(source = &quot;datelife&quot;, n_tree = 50)</code></td>
+<td>likely ✅ — <code>datelife</code> is in <code>Enhances</code>;
+install separately with
+<code>pak::pak(&quot;phylotastic/datelife&quot;)</code></td>
+</tr>
+<tr class="odd">
+<td>Birds</td>
+<td>A single tree, current Clements</td>
+<td><code>pr_get_tree(source = &quot;clootl&quot;, n_tree = 1)</code></td>
+<td>✅ verified — works out of the box (uses the v1.6/2025 taxonomy
+bundled with <code>clootl</code>)</td>
+</tr>
+<tr class="even">
+<td>Birds</td>
+<td>A posterior of trees, current Clements</td>
+<td><code>pr_get_tree(source = &quot;clootl&quot;, n_tree = 50)</code></td>
+<td>⚠️ requires <code>clootl::get_avesdata_repo(&quot;.&quot;)</code> once before
+this works; without it <code>sampleTrees()</code> errors with
+<code>AvesData repo not found</code>. Capped at 100 upstream.</td>
+</tr>
+<tr class="odd">
+<td>Fish</td>
+<td>Time-calibrated, posterior</td>
+<td><code>pr_get_tree(source = &quot;fishtree&quot;, n_tree = 50)</code></td>
+<td>✅ verified — returns <code>multiPhylo[50]</code></td>
+</tr>
+<tr class="even">
+<td>Bird, mammal, fish, amphibian, reptile, plant, shark, bee,
+butterfly</td>
+<td>Taxon-specific mega-tree, possibly grafted</td>
+<td><code>pr_get_tree(source = &quot;rtrees&quot;, taxon = &quot;&lt;group&gt;&quot;)</code></td>
+<td>✅ works; ⚠️ <code>n_tree</code> is <strong>informational
+only</strong> — <code>rtrees::get_tree()</code> has no
+<code>n_tree</code> argument, so the count is fixed by the chosen
+mega-tree (<code>taxon = &quot;bird&quot;</code> → 100,
+<code>taxon = &quot;mammal&quot;</code> → 100, <code>taxon = &quot;fish&quot;</code> → 1,
+etc.).</td>
+</tr>
+</tbody>
+</table>
+<p>For the dating-only case (you already have a topology):</p>
+<table>
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>If your topology is…</th>
+<th>Use</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Universal taxa</td>
+<td><code>pr_date_tree(my_tree, n_dated = 50)</code></td>
+<td>likely ✅ — untested in this run; same dependency story as
+<code>datelife</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="whats-not-in-this-pipeline" class="section level2">
+<h2>What’s <em>not</em> in this pipeline</h2>
+<ul>
+<li><strong>Tree comparison across backends.</strong> prepR4pcm provides
+<code>pr_tree_compare()</code> for quick pairwise Jaccard /
+Robinson-Foulds / branch-length comparisons (see the <a href="comparing-tree-backends.html">comparing tree backends
+vignette</a>). For richer visual comparison use
+<code>phytools::cophyloplot()</code> or
+<code>phangorn::densiTree()</code>.</li>
+<li><strong>Trait imputation alone.</strong> That’s pigauto’s
+<code>impute()</code> / <code>multi_impute()</code>. This vignette skips
+straight to the trees-aware variant because that’s the integration
+point.</li>
+</ul>
+<p>For repeated runs of the same retrieval (e.g. while iterating on a
+manuscript), pass <code>cache = TRUE</code> to
+<code>pr_get_tree()</code>. The cache lives under
+<code>tools::R_user_dir()</code> by default; redirect with
+<code>pr_tree_cache_dir()</code> if you want it inside the project.</p>
+</div>
+<div id="see-also" class="section level2">
+<h2>See also</h2>
+<ul>
+<li><code>?pr_get_tree</code>, <code>?pr_date_tree</code>,
+<code>?pr_cite_tree</code>, <code>?reconcile_augment</code> — the four
+entry points for prepR4pcm’s tree-handling.</li>
+<li><a href="https://itchyshin.github.io/pigauto/articles/mixed-types.html">pigauto’s
+full PCM workflow vignette</a> — the downstream half, in detail.</li>
+<li>Sanchez Reyes et al. (2024). <em>DateLife: Leveraging databases and
+analytical tools to reveal the dated Tree of Life.</em> Systematic
+Biology 73(2): 470–485. DOI 10.1093/sysbio/syae015.</li>
+<li>Rabosky et al. (2018). <em>An inverse latitudinal gradient in
+speciation rate for marine fishes.</em> Nature 559: 392–395. DOI
+10.1038/s41586-018-0273-1.</li>
+</ul>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
